@@ -1,330 +1,662 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>🎮 Lễ Hội Game Tết 2026 – Menu (v5.3)</title>
-<style>
-/* CSS gọn, giữ giao diện đẹp */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{
-  overflow:hidden;
-  font-family:Segoe UI,system-ui,Arial;
-  /* background will be set by JS to an image + overlay */
-  background: linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.55)), url('') center/cover no-repeat fixed;
-  color:#fff;
-  transition: background-image .8s ease, background-color .4s ease;
-}
-.banner{position:fixed;top:0;width:100%;height:70px;background:linear-gradient(90deg,#ff1744,#ff9800,#ffd600);display:flex;align-items:center;justify-content:center;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3)}
-#aiText{font-weight:700;font-size:clamp(14px,2.5vw,20px);color:#4a1200}
-.cursor{width:2px;height:1em;background:#4a1200;margin-left:6px;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:0}}
-.header{margin-top:90px;text-align:center}
-.header h1{font-size:clamp(1.8em,4vw,3em);color:#ffd966;text-shadow:0 0 20px red,0 0 40px gold}
-.countdown{margin-top:8px;color:#ffe082;font-weight:600}
-.menu{position:absolute;bottom:170px;width:100%;display:flex;justify-content:center;gap:20px;padding:0 10px}
-.game-card{width:240px;padding:22px;border-radius:22px;text-align:center;cursor:pointer;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(255,200,0,.45);transition:.25s}
-.game-card:hover{transform:translateY(-8px) scale(1.04)}
-.game-card span{font-size:56px}
-.game-card h2{color:#ffd54f;margin-top:8px}
-.top-btn{position:fixed;right:15px;top:80px;display:flex;flex-direction:column;gap:10px;z-index:9999}
-.top-btn button{width:46px;height:46px;border:none;border-radius:50%;background:gold;font-size:18px;cursor:pointer}
-.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(45deg,#ffcc00,#ff1744);color:#400;padding:10px 18px;border-radius:20px;font-weight:600;box-shadow:0 0 20px gold;z-index:9999}
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}
-.popup .box{background:#fff7e6;color:#600;padding:18px;border-radius:14px;max-width:520px;text-align:left}
-#vol{position:fixed;right:18px;top:150px;z-index:9999;width:6px;height:90px;background:gold;border-radius:10px}
-canvas{position:fixed;inset:0;pointer-events:none}
-@media(max-width:768px){.menu{flex-direction:column;bottom:220px}}
-.info-title{font-weight:700;color:#4a1200;margin-bottom:8px}
-.info-list{margin-left:16px}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Lễ Hội Game Tết 2026 – Menu (v5.5 Local Files)</title>
+    <style>
+        /* Typography & Variables */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&family=Mali:wght@500;700&display=swap');
+
+        :root {
+            --accent: #ffd54f;
+            --banner-start: #ff1744;
+            --banner-end: #ffd600;
+            --btn-bg: #ffd700;
+            --text: #ffffff;
+            --overlay-a: 0.25;
+            --overlay-b: 0.45;
+            --color-01: #ff4757;
+            --color-02: #ffa502;
+            --color-03: #2ed573;
+            --color-04: #70a1ff;
+            --font-main: 'Inter', sans-serif;
+            --font-accent: 'Mali', cursive;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            overflow: hidden;
+            font-family: var(--font-main);
+            background: #000;
+            color: var(--text);
+            height: 100vh;
+            width: 100vw;
+            transition: background 0.5s ease;
+        }
+
+        /* Background Layer */
+        #bgContainer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.8s ease-in-out;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(0,0,0,var(--overlay-a)), rgba(0,0,0,var(--overlay-b)));
+            z-index: 1;
+        }
+
+        /* Animated Color Blurs */
+        .fireworks-area { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+        .animate-color { position: absolute; inset: 0; mix-blend-mode: screen; opacity: 0.4; }
+        .animate-color__item { width: 40vw; height: 40vh; position: absolute; filter: blur(80px); border-radius: 50%; }
+        .animate-color__item:nth-child(1) { background: var(--color-01); animation: ac1 10s infinite alternate; top: 0; right: 0; }
+        .animate-color__item:nth-child(2) { background: var(--color-02); animation: ac2 12s infinite alternate; bottom: 0; left: 0; }
+        
+        @keyframes ac1 { 0% { transform: translate(0, 0); } 100% { transform: translate(-50%, 50%); } }
+        @keyframes ac2 { 0% { transform: translate(0, 0); } 100% { transform: translate(50%, -50%); } }
+
+        /* Canvas */
+        #fireworksCanvas { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+
+        /* Banner & Typewriter */
+        .banner {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: linear-gradient(90deg, var(--banner-start), var(--banner-end));
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #aiText { font-weight: 800; font-size: clamp(14px, 4vw, 18px); color: #4a1200; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cursor { width: 3px; height: 1.2em; background: #4a1200; margin-left: 5px; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* UI Containers */
+        .ui-layer { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 80px; pointer-events: none; }
+        .ui-layer > * { pointer-events: auto; }
+
+        /* Header & Countdown */
+        .header h1 { 
+            font-family: var(--font-accent); 
+            font-size: clamp(1.8rem, 6vw, 3.2rem); 
+            color: var(--accent); 
+            text-shadow: 0 0 15px rgba(255,213,79,0.5), 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .timeboxes { display: flex; gap: 10px; justify-content: center; }
+        .timebox { 
+            background: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(5px);
+            padding: 10px; border-radius: 12px; 
+            min-width: 70px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .timebox .num { font-weight: 800; font-size: 1.4rem; color: #fff; display: block; }
+        .timebox .lbl { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; font-weight: 600; }
+
+        /* Controls Groups */
+        .control-pill {
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 20px;
+            padding: 8px 15px; color: #fff; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+            transition: background 0.2s;
+        }
+        .control-pill:hover { background: rgba(255,255,255,0.25); }
+
+        /* LEFT: Fireworks Controls */
+        .left-controls { position: fixed; left: 15px; top: 75px; display: flex; flex-direction: column; gap: 10px; z-index: 20; }
+        
+        /* RIGHT: Music Controls */
+        .right-controls { position: fixed; right: 15px; top: 75px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 20; }
+
+        /* RIGHT: Settings Buttons */
+        .settings-group { position: fixed; right: 15px; top: 165px; display: flex; flex-direction: column; gap: 10px; z-index: 20; }
+        
+        .circle-btn {
+            width: 45px; height: 45px; border-radius: 50%; border: none; 
+            background: var(--btn-bg); color: #4a1200; font-size: 20px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;
+        }
+        .circle-btn:active { transform: scale(0.9); }
+
+        /* Sliders Styling */
+        input[type=range] {
+            -webkit-appearance: none; background: rgba(255,255,255,0.3);
+            height: 4px; border-radius: 2px; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+            background: var(--accent); cursor: pointer; border: 2px solid #fff;
+        }
+
+        /* Menu */
+        .menu { 
+            margin-top: auto; margin-bottom: 50px;
+            display: flex; gap: 20px; width: 100%; justify-content: center; padding: 20px;
+        }
+        .game-card {
+            width: 220px; background: rgba(255,255,255,0.1); backdrop-filter: blur(15px);
+            border-radius: 24px; padding: 25px 15px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; cursor: pointer;
+        }
+        .game-card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.15); border-color: var(--accent); }
+        .game-card .icon { font-size: 50px; margin-bottom: 15px; display: block; }
+        .game-card h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 5px; }
+        .game-card p { font-size: 0.85rem; opacity: 0.8; }
+
+        /* Overlay Popups */
+        .popup { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            display: none; align-items: center; justify-content: center; z-index: 100;
+            padding: 20px;
+        }
+        .popup-box { 
+            background: #fff; color: #333; padding: 25px; border-radius: 20px; 
+            max-width: 450px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: #4a1200; color: #ffd700; padding: 10px 25px; border-radius: 30px;
+            font-weight: 700; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown { from { top: 40px; opacity: 0; } to { top: 80px; opacity: 1; } }
+
+        /* --- PHẦN THÊM MỚI: CSS CHO HOA RƠI --- */
+        .petal {
+            position: fixed;
+            top: -10%;
+            z-index: 5;
+            pointer-events: none;
+            user-select: none;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        /* -------------------------------------- */
+
+        @media (max-width: 768px) {
+            .menu { flex-direction: column; align-items: center; }
+            .game-card { width: 90%; padding: 15px; }
+            /* Mobile Layout Adjustments */
+            .settings-group { top: auto; bottom: 20px; right: 20px; flex-direction: row; }
+            .left-controls { top: 70px; left: 10px; transform: scale(0.9); transform-origin: top left; }
+            .right-controls { top: 70px; right: 10px; transform: scale(0.9); transform-origin: top right; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- BANNER AI -->
-<div class="banner" role="banner" aria-hidden="false">
-  <div id="aiText" aria-live="polite"></div><div class="cursor" aria-hidden="true"></div>
-</div>
+    <div id="bgContainer"></div>
+    <div class="bg-overlay"></div>
 
-<!-- TOP BUTTONS -->
-<div class="top-btn" role="toolbar" aria-label="Controls">
-  <button onclick="toggleMusic()" title="Phát / Tắt nhạc" aria-label="Play music">🎵</button>
-  <button onclick="toggleTheme()" title="Chuyển theme" aria-label="Toggle theme">🌗</button>
-  <button onclick="full()" title="Toàn màn hình" aria-label="Fullscreen">⛶</button>
-  <button onclick="changeBg()" title="Đổi nền" aria-label="Change background">🖼️</button>
-  <button onclick="showInfo()" title="Thông tin & Điều khoản" aria-label="Info">ℹ️</button>
-</div>
-
-<!-- VOLUME SLIDER -->
-<input id="vol" type="range" min="0" max="100" aria-label="Âm lượng" />
-
-<!-- HEADER -->
-<div class="header">
-  <h1>🎉 LỄ HỘI GAME TẾT 2026 🎉</h1>
-  <div class="countdown" id="countdown" aria-live="polite"></div>
-</div>
-
-<!-- MENU GAMES -->
-<div class="menu" role="navigation" aria-label="Chọn trò chơi">
-  <div class="game-card" onclick="goGame('le-hoi-xao-tron-2026/coc.html')">
-    <span>🥤</span>
-    <h2>3 CỐC BÓNG</h2>
-    <p>Trí nhớ & phản xạ</p>
-  </div>
-
-  <div class="game-card" onclick="goGame('le-hoi-caro-2026/caro.html')">
-    <span>♟️</span>
-    <h2>CỜ CARO</h2>
-    <p>Đấu trí chiến thuật</p>
-  </div>
-</div>
-
-<!-- INFO POPUP (Version 5.3 + Điều khoản) -->
-<div class="popup" id="infoPopup" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
-  <div class="box">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div id="infoTitle" class="info-title">📢 Thông tin & Điều khoản — Version 5.3</div>
-        <div style="font-size:13px;color:#333">Cập nhật: v5.3</div>
-      </div>
-      <button onclick="closeInfo()" style="background:#ffd54f;border:none;padding:6px 10px;border-radius:8px;cursor:pointer">Đóng</button>
+    <div class="fireworks-area" id="fireworksArea">
+        <div class="animate-color">
+            <div class="animate-color__item"></div>
+            <div class="animate-color__item"></div>
+        </div>
     </div>
 
-    <hr style="margin:8px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+    <canvas id="fireworksCanvas"></canvas>
 
-    <div style="margin-top:8px">
-      <b>Điểm nổi bật (v5.3):</b>
-      <ul class="info-list">
-        <li>• Loại bỏ tính năng <b>Lì xì</b> — chuyển sang cơ chế điểm & leaderboard chính thức trong các bản tiếp theo.</li>
-        <li>• Sửa lỗi <b>Toàn màn hình</b> — hoạt động tốt trên hầu hết trình duyệt (kèm rung nhẹ trên thiết bị hỗ trợ).</li>
-        <li>• Tối ưu trải nghiệm mobile & desktop, giữ nguyên hiệu ứng hoa mai và pháo hoa nhẹ nhàng.</li>
-      </ul>
+    <div class="banner">
+        <span id="aiText"></span><div class="cursor"></div>
     </div>
 
-    <div style="margin-top:10px">
-      <b>Thêm nhiều lời chúc:</b>
-      <ul class="info-list" id="moreWishes">
-        <!-- filled by JS -->
-      </ul>
+    <div class="left-controls">
+        <div class="control-pill" id="fwToggle">🎇 Pháo hoa: Bật</div>
+        <div class="control-pill" id="petalToggle">🌸 Hoa rơi: Bật</div>
+        <div class="control-pill">
+            Mức: <input id="fwIntensity" type="range" min="1" max="5" value="3" style="width:60px" />
+        </div>
+        <div class="control-pill" id="autoStopBtn">⏳ Hẹn giờ tắt</div>
     </div>
 
-    <div style="margin-top:12px">
-      <b>Điều khoản & Chính sách ngắn gọn:</b>
-      <ol class="info-list">
-        <li><b>Hành vi:</b> Không sử dụng phần mềm gian lận, bot, hoặc can thiệp không hợp lệ. Vi phạm có thể dẫn tới bị khóa tài khoản (nếu áp dụng).</li>
-        <li><b>Quyền sở hữu:</b> Nội dung, hình ảnh và âm thanh trong trang thuộc quyền quản lý của bạn / dự án — sử dụng hợp pháp và tôn trọng bản quyền.</li>
-        <li><b>Quyền riêng tư:</b> Ứng dụng lưu một số dữ liệu cục bộ (localStorage) để giữ UID/người chơi. Không thu thập thông tin nhạy cảm.</li>
-        <li><b>Trách nhiệm:</b> Mục đích giải trí; nhà phát triển không chịu trách nhiệm về mất mát dữ liệu cá nhân do chỉnh sửa/truy cập trái phép.</li>
-        <li><b>Liên hệ admin:</b> Để quản trị — thêm node <code>admins/&lt;yourUid&gt;</code> trong Realtime DB hoặc liên hệ người phát triển dự án.</li>
-      </ol>
+    <div class="right-controls">
+        <div class="control-pill" id="musicPill">🎵 Nhạc: Tắt</div>
+        <div class="control-pill">
+            Vol: <input id="volSlider" type="range" min="0" max="1" step="0.1" value="0.5" style="width:60px" />
+        </div>
     </div>
 
-    <div style="margin-top:12px;font-size:13px;color:#444">
-      <b>Gợi ý:</b> Muốn tích hợp leaderboard/ghi điểm/tắt tính năng nào khác — mình hỗ trợ tích hợp Firebase & rules an toàn.
+    <div class="settings-group">
+        <button class="circle-btn" id="themeBtn" onclick="toggleTheme()" title="Theme">🌗</button>
+        <button class="circle-btn" onclick="changeBg()" title="Đổi nền">🖼️</button>
+        <button class="circle-btn" onclick="showInfo()" title="Thông tin">ℹ️</button>
     </div>
-  </div>
+
+    <div class="ui-layer">
+        <header class="header">
+            <h1>🎉 LỄ HỘI GAME TẾT 2026 🎉</h1>
+            <div class="timeboxes">
+                <div class="timebox"><span class="num" id="days">00</span><span class="lbl">Ngày</span></div>
+                <div class="timebox"><span class="num" id="hours">00</span><span class="lbl">Giờ</span></div>
+                <div class="timebox"><span class="num" id="minutes">00</span><span class="lbl">Phút</span></div>
+                <div class="timebox"><span class="num" id="seconds">00</span><span class="lbl">Giây</span></div>
+            </div>
+        </header>
+
+        <nav class="menu">
+            <div class="game-card"
+                onclick="goGame('le-hoi-xao-tron-2026/coc.html')" 
+                tabindex="0"
+                onkeypress="if(event.key==='Enter') goGame('le-hoi-xao-tron-2026/coc.html')">
+                <span class="icon">🥛</span>
+                <h2>3 CỐC BÓNG</h2>
+                <p>Thử thách trí nhớ siêu phàm</p>
+            </div>
+            <div class="game-card"
+                onclick="goGame('le-hoi-caro-2026/caro.html')" 
+                tabindex="0"
+                onkeypress="if(event.key==='Enter') goGame('le-hoi-caro-2026/caro.html')">
+                <span class="icon">♟️</span>
+                <h2>CỜ CARO</h2>
+                <p>Đấu trí cùng AI thông minh</p>
+            </div>
+        </nav>
+    </div>
+
+<div class="popup" id="infoPopup">
+    <div class="popup-box">
+        <div class="popup-header">
+            <h3>📢 Thông tin & Điều khoản</h3>
+            <button onclick="closeInfo()" style="border:none; background:none; font-size:24px; cursor:pointer">&times;</button>
+        </div>
+
+        <div style="font-size:14px; line-height:1.65; max-height:65vh; overflow:auto">
+
+            <p><b>Phiên bản:</b> v5.5 – Tết 2026 <br> Bản v5.6 sẽ sớm ra mắt</p>
+            <p><b>Bản quyền:</b> © 2026 Luavang Studio</p>
+
+            <hr style="margin:10px 0; opacity:0.25">
+
+            <p>
+                Chào mừng bạn đến với <b>Lễ Hội Game Tết 2026</b>.  
+                Đây là cổng game giải trí ngày Tết, mang lại trải nghiệm vui vẻ,
+                may mắn và không khí xuân rộn ràng cho người chơi.  
+                Hãy tận hưởng những trò chơi thú vị, pháo hoa rực rỡ và âm nhạc Tết sôi động!
+            </p>
+
+            <h4 style="margin-top:10px">Tính năng nổi bật</h4>
+            <ul style="margin-left:20px">
+                <li>Pháo hoa canvas nhiều hiệu ứng, nhẹ & mượt.</li>
+                <li>Nhạc Tết bật / tắt, chỉnh âm lượng.</li>
+                <li>Hiệu ứng hoa rơi</li>
+                <li>Đổi nhiều ảnh nền Tết. Đang được phát triển</li>
+                <li>AI tự động viết lời chúc năm mới.</li>
+                <li>Chế độ sáng / tối.</li>
+                <li>Tương thích PC & Mobile.</li>
+            </ul>
+
+            <h4 style="margin-top:10px">Lời chúc năm mới</h4>
+            <ul style="margin-left:20px">
+                <li>An khang thịnh vượng</li>
+                <li>Vạn sự như ý</li>
+                <li>Sức khỏe dồi dào – chơi game thắng lớn</li>
+                <li>Tết này rực rỡ hơn Tết trước</li>
+            </ul>
+
+            <h4 style="margin-top:10px">Điều khoản sử dụng</h4>
+            <ol style="margin-left:20px">
+                <li>❌ Cấm sử dụng hack, bot, tool gian lận.</li>
+                <li>❌ Không khai thác lỗi hệ thống để trục lợi.</li>
+                <li>👤 Người chơi chịu trách nhiệm với tên trong game.</li>
+                <li>🛑 Vi phạm có thể bị khóa tạm thời hoặc vĩnh viễn.</li>
+                <li>🔒 Không thu thập dữ liệu cá nhân nhạy cảm.</li>
+                <li>⚠️ Hệ thống có thể cập nhật luật để đảm bảo công bằng.</li>
+            </ol>
+
+            <p style="margin-top:10px; font-size:13px; opacity:0.85">
+                  Game mang tính giải trí ngày Tết, không quy đổi tiền thật.
+                Dữ liệu có thể được reset sau khi kết thúc sự kiện.
+            </p>
+            <p style="margin-top:10px; text-align:center; font-weight:600">
+                🎉 Luavang Studio xin kính chúc quý khách một năm mới an khang thịnh vượng! 🎉
+            </p>
+        </div>
+    </div>
 </div>
 
-<!-- EFFECT CANVAS -->
-<canvas id="fx" aria-hidden="true"></canvas>
+    <audio id="bgm" loop></audio>
 
-<!-- SOUNDS -->
-<audio id="clickSound" src="click.mp3" preload="auto"></audio>
-<audio id="bgm" preload="auto" loop><source src="nhac-tet.mp3" type="audio/mpeg"></audio>
+    <script>
+        /* CONFIGURATION */
+        // --- THAY ĐỔI Ở ĐÂY: Tên các file ảnh của bạn ---
+        const BG_IMAGES = [
+            'assets/tet/anh1.jpg',
+            'assets/tet/anh2.jpg',
+            'assets/tet/anh3.jpg',
+            'assets/tet/anh4.jpg',
+            'assets/tet/anh5.jpg',
+            'assets/tet/anh6.jpg'
+            // Bạn có thể thêm 'anh-nen-4.png', v.v. nếu muốn
+        ];
 
-<!-- SCRIPT -->
-<script>
-/* ================= USER & UID ================= */
-let uid = localStorage.uid;
-if(!uid){
-  uid = "u_" + Math.random().toString(36).slice(2,10);
-  localStorage.uid = uid;
-}
-let name = localStorage.playerName || prompt("🎊 Nhập tên của bạn:") || "Bạn";
-localStorage.playerName = name;
+        let currentBgIdx = 0;
+        let fwEnabled = true;
+        let musicOn = false;
+        let intensity = 3;
+        // THÊM MỚI: Biến kiểm soát hoa rơi
+        let petalsEnabled = true;
 
-/* ================= BACKGROUND IMAGES (random + change button) ================= */
-const bgImages = [
-  "assets/tet/anh1.jpg",
-  "assets/tet/anh2.jpg",
-  "assets/tet/anh3.jpg",
-  "assets/tet/anh4.jpg",
-  "assets/tet/anh5.jpg",
-  "assets/tet/anh6.jpg",
-];
+        /* INITIALIZATION */
+        window.onload = () => {
+            changeBg(0);
+            startCountdown();
+            startTypewriter();
+            initFireworks();
+            // THÊM MỚI: Khởi tạo hoa rơi
+            initPetals();
+            
+            // Set initial volume
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            
+            // Context menu protection
+            document.addEventListener('contextmenu', e => e.preventDefault());
+        };
 
-function setRandomBackground(){
-  const url = bgImages[Math.floor(Math.random()*bgImages.length)];
-  document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.55)), url("${url}")`;
-  document.body.style.backgroundSize = 'cover';
-  document.body.style.backgroundPosition = 'center';
-}
-function changeBg(){
-  setRandomBackground();
-  toast("🖼️ Đã đổi giao diện nền");
-}
-setRandomBackground(); // initial
+        /* UI HELPERS */
+        function toast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
 
-/* ================= MUSIC / VOLUME ================= */
-const bgm = document.getElementById('bgm');
-const volEl = document.getElementById('vol');
-const clickSound = document.getElementById('clickSound');
-let musicOn = localStorage.music === 'on';
-bgm.volume = localStorage.vol ? +localStorage.vol : 0.7;
-volEl.value = Math.round(bgm.volume * 100);
+        function changeBg(idx) {
+            if (idx !== undefined) currentBgIdx = idx;
+            else currentBgIdx = (currentBgIdx + 1) % BG_IMAGES.length;
+            
+            const container = document.getElementById('bgContainer');
+            // Sử dụng ảnh cục bộ
+            container.style.backgroundImage = `url('${BG_IMAGES[currentBgIdx]}')`;
+        }
 
-function startMusic(){
-  if (musicOn) bgm.play().catch(()=>{});
-  document.removeEventListener('click', startMusic);
-  document.removeEventListener('touchstart', startMusic);
-}
-document.addEventListener('click', startMusic);
-document.addEventListener('touchstart', startMusic);
+        function showInfo() { document.getElementById('infoPopup').style.display = 'flex'; }
+        function closeInfo() { document.getElementById('infoPopup').style.display = 'none'; }
 
-function toggleMusic(){
-  musicOn = !musicOn;
-  localStorage.music = musicOn ? 'on' : 'off';
-  musicOn ? bgm.play().catch(()=>{}) : bgm.pause();
-}
-volEl.addEventListener('input', ()=> {
-  bgm.volume = volEl.value / 100;
-  localStorage.vol = bgm.volume;
-});
+        /* TYPEWRITER */
+        const quotes = [
+            "Chúc mừng năm mới Bính Ngọ 2026!",
+            "An khang thịnh vượng - Vạn sự như ý!",
+            "Phát tài phát lộc - Sức khỏe dồi dào!",
+            "Tết đến xuân về - Game hay mê mệt!",
+            "Cùng chơi, cùng vui - Đón Tết rộn ràng!",
+            "Chơi game, giải trí - Tết thêm ý nghĩa!",
+            "Năm mới thắng lợi - Game càng hưng thịnh!",
+            "Xuân sang rộn rã - Game vui bất tận!"
+        ];
+        let qIdx = 0, charIdx = 0;
+        function startTypewriter() {
+            const el = document.getElementById('aiText');
+            if (charIdx < quotes[qIdx].length) {
+                el.textContent += quotes[qIdx][charIdx++];
+                setTimeout(startTypewriter, 50);
+            } else {
+                setTimeout(() => {
+                    el.textContent = "";
+                    charIdx = 0;
+                    qIdx = (qIdx + 1) % quotes.length;
+                    startTypewriter();
+                }, 2500);
+            }
+        }
 
-/* ================= THEME ================= */
-function toggleTheme(){
-  document.body.classList.toggle('light');
-  if(document.body.classList.contains('light')){
-    document.body.style.backgroundBlendMode = 'normal';
-    document.body.style.background = 'linear-gradient(#fff7e6,#ffd180)';
-    document.body.style.color = '#600';
-  } else {
-    // restore image overlay (keeps last chosen image)
-    setRandomBackground(); // choose new image for clarity
-    document.body.style.color = '#fff';
-  }
-}
+        /* COUNTDOWN */
+        function startCountdown() {
+            const target = new Date("Feb 17, 2026 00:00:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-/* ================= FULLSCREEN + VIBRATION (fix v5.3) ================= */
-function full(){
-  const el = document.documentElement;
-  const isFull = document.fullscreenElement || document.webkitFullscreenElement || false;
-  // Try to vibrate briefly when toggling (mobile)
-  try{ if(navigator.vibrate) navigator.vibrate(30); } catch(e){}
-  if(!isFull){
-    if(el.requestFullscreen) el.requestFullscreen();
-    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if(el.msRequestFullscreen) el.msRequestFullscreen();
-  } else {
-    if(document.exitFullscreen) document.exitFullscreen();
-    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-  }
-}
+                document.getElementById('days').innerText = String(d).padStart(2, '0');
+                document.getElementById('hours').innerText = String(h).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(m).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(s).padStart(2, '0');
+            }, 1000);
+        }
 
-/* ================= NAVIGATE TO GAME ================= */
-function clickSoundPlay(){ if(clickSound){ clickSound.currentTime = 0; clickSound.play().catch(()=>{}); } }
-function goGame(url){
-  clickSoundPlay();
-  toast('🎮 Đang vào game...');
-  setTimeout(()=> location.href = url, 600);
-}
+        /* MUSIC CONTROLS (LOCAL FILE) */
+        const musicPill = document.getElementById('musicPill');
+        const volSlider = document.getElementById('volSlider');
+        const bgm = document.getElementById('bgm');
+        
+        // File nhạc cục bộ
+        bgm.src = "nhac-tet.mp3"; 
 
-/* ================= TOAST ================= */
-function toast(msg){
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.innerText = msg;
-  document.body.appendChild(t);
-  setTimeout(()=> t.remove(), 2600);
-}
+        musicPill.onclick = () => {
+            if (!musicOn) {
+                bgm.play().then(() => {
+                    musicOn = true;
+                    musicPill.innerText = "⏸️ Nhạc: Bật";
+                    toast("🎶 Đang phát nhạc Xuân");
+                }).catch((error) => {
+                    console.error(error);
+                    toast("⚠️ Không tìm thấy file 'nhac-tet.mp3'!");
+                });
+            } else {
+                bgm.pause();
+                musicOn = false;
+                musicPill.innerText = "🎵 Nhạc: Tắt";
+            }
+        };
 
-/* ================= BANNER AI TYPEWRITER (mở rộng nhiều lời chúc) ================= */
-const wishes = [
-  `🎉 Chúc ${localStorage.playerName||'bạn'} năm mới an khang – phát tài 🧧`,
-  "🌸 Xuân sang vạn sự như ý, sức khoẻ dồi dào",
-  "🔥 Năm mới thắng lớn, lộc đến đầy nhà",
-  "🎮 Chơi game vui vẻ — không căng thẳng, thắng hay thua đều vui",
-  "💫 Tâm an, thân khỏe, học hành tiến bộ, công việc thuận lợi",
-  "🍊 Lì xì chúc phúc (đã chuyển sang cơ chế điểm trong phiên bản mới)",
-  "🌱 Hy vọng mới, cơ hội mới, may mắn luôn bên bạn",
-  "⭐ Chúc bạn đạt nhiều thành tích trong game & cuộc sống",
-  "🎆 Cầu mong một năm hòa thuận, bình an, tràn đầy tiếng cười",
-  "🧡 Yêu thương, sẻ chia và nhiều kỷ niệm đẹp bên gia đình"
-];
-let wi = 0, ci = 0, el = document.getElementById('aiText');
-(function type(){
-  if(ci < wishes[wi].length){
-    el.textContent += wishes[wi][ci++];
-    setTimeout(type, 40);
-  } else {
-    setTimeout(()=>{ el.textContent = ''; ci = 0; wi = (wi+1) % wishes.length; type(); }, 2200);
-  }
-})();
+        volSlider.oninput = (e) => {
+            bgm.volume = e.target.value;
+            if(bgm.volume == 0) musicPill.innerText = "🔇 Nhạc: Im lặng";
+            else if(musicOn) musicPill.innerText = "⏸️ Nhạc: Bật";
+        };
 
-/* ================= COUNTDOWN ================= */
-const cd = document.getElementById('countdown');
-setInterval(()=> {
-  const t = new Date("2026-02-17T00:00:00") - new Date();
-  if(t > 0){
-    const days = Math.floor(t / 86400000);
-    const hours = Math.floor((t % 86400000) / 3600000);
-    cd.innerText = `⏳ Còn ${days} ngày ${hours} giờ tới Tết`;
-  } else {
-    cd.innerText = "🎆 Chúc mừng năm mới!";
-  }
-}, 1000);
+        /* FIREWORKS ENGINE */
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let rockets = [];
 
-/* ================= PARTICLES VISUAL ================= */
-const canvas = document.getElementById('fx');
-const ctx = canvas.getContext('2d');
-let particles = [];
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-setInterval(()=> {
-  particles.push({ x: Math.random()*canvas.width, y: canvas.height + 10, r: Math.random()*3+2, vx: (Math.random()-0.5)*1.5, vy: -2-Math.random()*2, life: 300 });
-}, 220);
+        function initFireworks() {
+            resize();
+            window.addEventListener('resize', resize);
+            render();
+        }
 
-(function anim(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach((p, i) => {
-    ctx.fillStyle = "rgba(255,215,0,0.95)";
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    ctx.fill();
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.02;
-    p.life--;
-  });
-  particles = particles.filter(p => p.life > 0 && p.y > -50);
-  requestAnimationFrame(anim);
-})();
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
 
-/* ================= INFO POPUP: thêm nhiều lời chúc vào danh sách ================= */
-function showInfo(){ 
-  const list = document.getElementById('moreWishes');
-  if(list && list.children.length === 0){
-    const extras = [
-      "An khang thịnh vượng, tiền vô như nước.",
-      "Gặp may mắn trong mọi quyết định, bình an trong mỗi ngày.",
-      "Gia đình ấm no, bạn bè thân mật, niềm vui dài lâu.",
-      "Học tập tiến bộ, thi cử thành công, thăng tiến công việc.",
-      "Tâm sáng, lòng hiền, mọi thứ hanh thông.",
-      "Chúc bạn có những trải nghiệm mới tuyệt vời trong năm tới."
-    ];
-    extras.forEach(t=>{
-      const li = document.createElement('li');
-      li.textContent = t;
-      list.appendChild(li);
-    });
-  }
-  document.getElementById('infoPopup').style.display = 'flex'; 
-}
-function closeInfo(){ document.getElementById('infoPopup').style.display = 'none'; }
+        class Rocket {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height;
+                this.speed = 10 + Math.random() * 5;
+                this.angle = Math.PI * 1.5 + (Math.random() * 0.2 - 0.1);
+                this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                this.alive = true;
+            }
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                if (this.y < canvas.height * 0.2 + Math.random() * 200) {
+                    this.alive = false;
+                    explode(this.x, this.y, this.color);
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-</script>
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y;
+                this.color = color;
+                this.angle = Math.random() * Math.PI * 2;
+                this.speed = Math.random() * 4 + 2;
+                this.friction = 0.95;
+                this.gravity = 0.1;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+            }
+            update() {
+                this.speed *= this.friction;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed + this.gravity;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
 
+        function explode(x, y, color) {
+            const count = intensity * 20;
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function render() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (fwEnabled && Math.random() < 0.03 * intensity) {
+                rockets.push(new Rocket());
+            }
+
+            rockets.forEach((r, i) => {
+                r.update();
+                r.draw();
+                if (!r.alive) rockets.splice(i, 1);
+            });
+
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) particles.splice(i, 1);
+            });
+
+            requestAnimationFrame(render);
+        }
+
+        /* FW CONTROLS */
+        document.getElementById('fwToggle').onclick = function() {
+            fwEnabled = !fwEnabled;
+            this.innerText = fwEnabled ? "🎇 Pháo hoa: Bật" : "🎇 Pháo hoa: Tắt";
+            document.getElementById('fireworksArea').style.display = fwEnabled ? 'block' : 'none';
+        };
+
+        document.getElementById('fwIntensity').oninput = (e) => {
+            intensity = e.target.value;
+        };
+
+        document.getElementById('autoStopBtn').onclick = () => {
+            const time = prompt("Tự động tắt sau bao nhiêu giây?", "30");
+            if (time) {
+                toast(`⏳ Sẽ tắt pháo hoa sau ${time}s`);
+                setTimeout(() => {
+                    fwEnabled = false;
+                    document.getElementById('fwToggle').innerText = "🎇 Pháo hoa: Tắt";
+                    toast("🎆 Đã tự động tắt pháo hoa");
+                }, time * 1000);
+            }
+        };
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            if (document.body.classList.contains('light-theme')) {
+                document.querySelector('.bg-overlay').style.background = 'rgba(255,255,255,0.2)';
+                toast("☀️ Đã chuyển sang chế độ sáng");
+            } else {
+                document.querySelector('.bg-overlay').style.background = 'linear-gradient(rgba(0,0,0,var(--overlay-a)), rgba(0,0,0,var(--overlay-b)))';
+                toast("🌙 Đã chuyển sang chế độ tối");
+            }
+        }
+
+        // --- PHẦN THÊM MỚI: HÀM XỬ LÝ HOA RƠI ---
+        function initPetals() {
+            setInterval(() => {
+                if(petalsEnabled) createPetal();
+            }, 300);
+
+            document.getElementById('petalToggle').onclick = function() {
+                petalsEnabled = !petalsEnabled;
+                this.innerText = petalsEnabled ? "🌸 Hoa rơi: Bật" : "🌸 Hoa rơi: Tắt";
+                if(!petalsEnabled) {
+                    document.querySelectorAll('.petal').forEach(p => p.remove());
+                }
+            };
+        }
+
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            // Ngẫu nhiên chọn hoa mai (vàng) hoặc hoa đào (hồng)
+            const isMai = Math.random() > 0.5;
+            petal.innerHTML = isMai ? '🌸' : '💮'; 
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.fontSize = (Math.random() * 15 + 10) + 'px';
+            petal.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            petal.style.filter = `hue-rotate(${Math.random() * 20}deg)`;
+            document.body.appendChild(petal);
+            setTimeout(() => petal.remove(), 7000);
+        }
+        // ----------------------------------------
+
+        // --- HÀM CHUYỂN TRANG TRÒ CHƠI ---
+        function goGame(url) {
+            toast("Đang vào trò chơi...");
+            setTimeout(() => {
+                window.location.href = url;
+            }, 800); // Đợi 0.8s để người dùng thấy hiệu ứng thông báo
+        }
+    </script>
+    <footer id="copyright"
+    style="
+        position: fixed;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #ffffff;
+        opacity: 0.8;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        user-select: none;
+        pointer-events: none;
+        z-index: 9999;
+        text-shadow: 0 0 3px rgba(0,0,0,0.6);
+    ">
+    © 2026 Luavang – All Rights Reserved
+</footer>
 </body>
 </html>

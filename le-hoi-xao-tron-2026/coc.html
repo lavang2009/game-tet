@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <!-- META: chặn zoom trên mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Lễ Hội Xáo Trộn 2026 - Master</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:,">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@300;600;700&display=swap');
+
+        body { margin: 0; background: #5e0b0b; font-family: 'Quicksand', sans-serif; user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        canvas { display: block; touch-action: none; }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+            -ms-touch-action: manipulation;
+            overscroll-behavior: none;
+        }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        .new-year-gradient {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(220, 38, 38, 0.95));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-width: 450px;
+            width: 90%;
+            transition: all 0.5s ease;
+        }
+
+        .btn-tet {
+            background: linear-gradient(to right, #d97706, #dc2626);
+            color: white; font-weight: 700; padding: 12px 24px; border-radius: 50px;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+            border: none; cursor: pointer;
+        }
+        .btn-tet:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        .tab-btn { padding: 8px 20px; font-weight: 700; font-size: 13px; border-radius: 20px; transition: 0.3s; color: #999; border: none; background: transparent; cursor: pointer; }
+        .tab-btn.active { background: #dc2626; color: white; }
+
+        .input-elegant {
+            background: #fdf2f2; border: 1px solid #fee2e2; padding: 12px 16px; border-radius: 15px;
+            width: 100%; outline: none; transition: 0.3s; font-size: 14px;
+        }
+        .input-elegant:focus { border-color: #d97706; background: white; }
+
+        #main-msg { font-family: 'Dancing Script', cursive; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); pointer-events: none; color: #ffd64d; }
+
+        .leaderboard-modal, .terms-modal, .admin-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 500px; height: 75vh; z-index: 6000; display: none;
+            flex-direction: column; background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px; border: 4px solid #d97706; padding: 25px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.6);padding-bottom: 120px;
+        }
+
+        .leader-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; border-radius: 15px; margin-bottom: 8px;
+            background: #fff; border: 1px solid #fee2e2;
+        }
+        .leader-row.top-rank { background: linear-gradient(90deg, #fff7ed, #fff); border-left: 5px solid #fbbf24; }
+
+        /* AI CHATBOT STYLES */
+        #ai-chat-window {
+            position: fixed; bottom: 90px; right: 20px; width: 340px; height: 450px;
+            background: white; border-radius: 25px; display: none; flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.4); z-index: 8000; overflow: hidden;
+            border: 3px solid #d97706;
+        }
+        .chat-bubble { padding: 10px 14px; border-radius: 18px; margin-bottom: 10px; font-size: 13px; line-height: 1.4; max-width: 85%; word-wrap: break-word; }
+        .ai-bubble { background: #f3f4f6; color: #1f2937; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user-bubble { background: #dc2626; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .status-shield { font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 5px; margin-left: 5px; }
+        .status-ok { background: #dcfce7; color: #166534; }
+        .status-admin { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+        .admin-tag { background: #1e1b4b; color: #e0e7ff; font-size: 9px; padding: 1px 5px; border-radius: 4px; margin-left: 5px; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #d97706; border-radius: 10px; }
+
+        /* Admin UI Special */
+        .admin-only { display: none; }
+        body.is-admin .admin-only { display: block; }
+
+        #admin-console {
+            background: #1a1a1a; color: #00ff00; font-family: monospace;
+            padding: 10px; border-radius: 10px; height: 100%; overflow-y: auto;
+            font-size: 12px;
+        }
+        .start-btn-wrapper {
+        bottom: 80px;
+        z-index: 9999;
+        }
+        .top-10-rank {
+            background: #fffbeb;
+            border-left: 4px solid #facc15;
+        }
+
+        /* Sticky wrapper at modal bottom */
+        #my-rank-wrap {
+            position: fixed;
+            bottom: 2px; /* 👈 QUAN TRỌNG */
+            left: 50%;
+            transform: translateX(-50%);
+
+            width: min(500px, 100%);
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+
+            background: linear-gradient(
+                to top,
+                rgba(255,255,255,0.98),
+                rgba(255,255,255,0.9)
+            );
+
+            border-radius: 20px;
+            border: 2px solid rgba(0,0,0,0.15);
+
+            z-index: 100000;
+            backdrop-filter: blur(10px);
+        }
+
+        #leader-list {
+            padding-bottom: 90px;
+        }
+        .chat-bubble.typing {
+            opacity: 0.7;
+            font-style: italic;
+            animation: typingBlink 1.2s infinite;
+        }
+
+        @keyframes typingBlink {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+
+        /* ===== MOBILE OPTIMIZATION ===== */
+        @media (max-width: 768px) {
+        
+            #my-rank-wrap .leader-row {
+            font-size: 13px;
+            padding: 10px;
+            }
+
+            body {
+                overflow: hidden;
+            }
+
+            /* Thu nhỏ UI user */
+            #ui-layer > div:first-child {
+                transform: scale(0.85);
+                transform-origin: top left;
+            }
+
+            /* Ẩn bớt nút phụ */
+            #admin-btn {
+                display: none !important;
+            }
+            .start-btn-wrapper {
+            bottom: 40px; /* 👈 hạ xuống thêm cho mobile */
+            }
+
+            /* Thu nhỏ nút start - mobile smaller */
+            #start-btn {
+                padding: 14px 28px !important;
+                font-size: 18px !important;
+                margin-top: 24px;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+                /* Khi đang tráo → ẩn nút */
+            #start-btn.is-shuffling {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(10px);
+            }
+
+            /* Chữ thông báo nhỏ lại */
+            #main-msg {
+                font-size: 36px !important;
+            }
+
+            /* AI chat gọn hơn */
+            #ai-chat-window {
+                width: 90% !important;
+                height: 65vh !important;
+                right: 5% !important;
+                bottom: 80px !important;
+            }
+        }
+
+        /* Simple progress bar styles (used only when showing rank progress) */
+        .rank-progress { height: 8px; background: #fff2; border-radius: 999px; overflow: hidden; margin-top:6px; }
+        .rank-progress-bar { height: 100%; background: linear-gradient(90deg,#f59e0b,#dc2626); width: 0%; transition: width 0.5s ease; }
+
+        /* Rank badge styles (big icon for 1/2/3) */
+        .rank-badge { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:50%; font-weight:900; color:white; margin-right:8px; box-shadow:0 8px 20px rgba(0,0,0,0.35); font-size:16px; }
+        .rank-1 { background: linear-gradient(90deg,#FFD700,#F59E0B); transform:scale(1.12); border: 2px solid rgba(255,255,255,0.6); }
+        .rank-2 { background: linear-gradient(90deg,#C0C0C0,#9CA3AF); border: 2px solid rgba(255,255,255,0.25); }
+        .rank-3 { background: linear-gradient(90deg,#CD7F32,#B45309); border: 2px solid rgba(255,255,255,0.18); }
+
+        /* larger font for the player's sticky area numbers */
+        #my-rank-wrap .font-black.text-red-600 { font-size:18px; }
+    </style>
+</head>
+<body>
+<!-- AI ASSISTANT TRIGGER -->
+<div id="ai-trigger" class="fixed bottom-6 right-6 z-[9000] cursor-pointer hover:scale-110 transition-transform">
+  <div class="new-year-gradient p-4 rounded-full shadow-2xl relative" onclick="toggleAIChat()">
+    <span class="text-3xl">🤖</span>
+    <div class="absolute -top-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full
+                flex items-center justify-center text-[10px] text-white font-bold">
+      AI
+    </div>
+  </div>
+</div>
+
+<!-- AI CHAT WINDOW -->
+<div id="ai-chat-window">
+  <div class="bg-red-800 p-4 text-white flex justify-between items-center shadow-lg">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🤖</span>
+      <div>
+        <p class="font-bold text-xs uppercase tracking-widest">Trợ lý Assistant</p>
+        <div class="flex items-center gap-1">
+          <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+          <p class="text-[9px] opacity-80 uppercase font-bold">Đang Trực Tuyến</p>
+        </div>
+      </div>
+    </div>
+    <button onclick="toggleAIChat()" class="text-2xl hover:rotate-90 transition-transform">&times;</button>
+  </div>
+
+  <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col">
+    <div class="chat-bubble ai-bubble">
+      Chào bạn! Tôi là Trợ lý Assistant 🤖  
+      Tôi có thể giúp bạn hiểu luật chơi, tài khoản hoặc mẹo chiến thắng 🎉
+    </div>
+  </div>
+
+  <div class="p-3 bg-gray-50 border-t flex gap-2 items-center">
+    <input id="ai-input" type="text" placeholder="Nhập tin nhắn..." class="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none">
+    <button onclick="askAI()" class="bg-red-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md">
+      ➔
+    </button>
+  </div>
+</div>
+
+<!-- THÔNG BÁO HỆ THỐNG -->
+<div id="msg-alert" class="fixed top-5 right-5 w-80 new-year-gradient p-4 rounded-2xl z-[7000] translate-x-[450px] transition-transform duration-500 text-white">
+    <div class="flex items-start gap-3">
+        <div class="bg-white/20 p-2 rounded-lg text-xl" id="ai-msg-icon">🤖</div>
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider opacity-70">Thông báo hệ thống</p>
+            <p id="msg-alert-text" class="text-sm font-bold"></p>
+        </div>
+    </div>
+</div>
+
+<!-- THỎA THUẬN NGƯỜI DÙNG MODAL -->
+<div id="terms-modal" class="terms-modal overflow-hidden">
+    <div class="mb-4">
+        <h2 class="text-2xl font-bold text-red-700 uppercase italic">Thỏa Thuận Người Dùng</h2>
+        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Phiên bản 1.0.5 - 2026</p>
+    </div>
+    <div class="flex-1 overflow-y-auto pr-2 text-sm text-gray-700 leading-relaxed mb-4">
+        <!-- (nội dung thỏa thuận giữ nguyên, truncated for readability) -->
+        <p class="mb-3">Chào mừng bạn đến với <b>Lễ Hội Xáo Trộn 2026</b>.</p>
+        <ul class="list-disc pl-5 space-y-2">
+    <b>📜 ĐIỀU KHOẢN & ĐIỀU KIỆN NGƯỜI CHƠI<br>
+    Lễ Hội Xáo Trộn 2026</b>
+    <li><b>1. Chấp nhận điều khoản</b></li>
+    Khi đăng ký tài khoản hoặc tham gia trò chơi Lễ Hội Xáo Trộn 2026, người chơi xác nhận đã đọc, hiểu và đồng ý toàn bộ các điều khoản dưới đây. Nếu không đồng ý, vui lòng không sử dụng trò chơi.
+    <li><b>2. Điều kiện tham gia</b></li>
+    Người chơi phải từ đủ 13 tuổi trở lên.
+    Mỗi Email hoặc Số điện thoại được phép tạo tối đa 3 tài khoản với tên hiển thị khác nhau.
+    Tên hiển thị phải là duy nhất, không được mạo danh người khác hoặc sử dụng từ ngữ phản cảm.
+    <li><b>3. Tài khoản & bảo mật</b><br>
+    Người chơi tự chịu trách nhiệm bảo mật thông tin đăng nhập và thiết bị cá nhân.
+    Dữ liệu trò chơi (điểm số, kỷ lục, mật khẩu) được lưu trữ bằng LocalStorage trên trình duyệt.
+    Nhà phát triển không chịu trách nhiệm nếu dữ liệu bị mất do xóa trình duyệt, cài lại hệ điều hành hoặc dùng thiết bị khác.
+    <li><b>4. Hành vi bị nghiêm cấm 🚫</b></li>
+    Người chơi không được phép:<br>
+    Sử dụng hack, cheat, script, phần mềm bên thứ ba hoặc can thiệp vào mã nguồn trò chơi.
+    Lợi dụng lỗi (bug) để trục lợi điểm số hoặc thứ hạng.
+    Can thiệp trái phép vào dữ liệu của người chơi khác hoặc hệ thống.
+    Có hành vi phá hoại, spam, xúc phạm người khác dưới mọi hình thức.<br>
+    ⚠️ Hệ thống AI an ninh sẽ tự động giám sát và ghi nhận hành vi bất thường.
+    <li><b>5. Hình thức xử lý vi phạm</b></li>
+    Tùy mức độ vi phạm, hệ thống có quyền:<br>
+                ⚠️ Cảnh báo<br>
+    ⏳ Khóa tài khoản tạm thời từ 1 – 3 ngày<br>
+    🔒 Khóa vĩnh viễn tài khoản (không thể khôi phục)<br>
+    Quyết định của hệ thống và nhà phát triển là cuối cùng.
+    <li><b>6. Điểm số & bảng xếp hạng</li></b>
+    Điểm số và kỷ lục được ghi nhận tự động bởi hệ thống.
+    Mọi điểm số đạt được bằng gian lận sẽ bị xóa mà không cần thông báo trước.
+    Bảng xếp hạng chỉ mang tính giải trí, không quy đổi thành tiền hoặc tài sản thực.
+    <li><b>7. Quyền sở hữu & bản quyền</b></li>
+    Trò chơi được phát triển bởi “Lù A Vangg”, có sự hỗ trợ công nghệ AI từ Google.
+    Mọi nội dung, hình ảnh, mã nguồn thuộc quyền sở hữu của nhà phát triển.
+    Nghiêm cấm sao chép, chỉnh sửa hoặc tái sử dụng khi chưa có sự cho phép.
+    <li><b>8. Giới hạn trách nhiệm</b></li>
+    Trò chơi được cung cấp “nguyên trạng” nhằm mục đích giải trí.
+    Nhà phát triển không chịu trách nhiệm cho bất kỳ thiệt hại trực tiếp hay gián tiếp nào phát sinh từ việc sử dụng trò chơi.
+    <li><b>9. Thay đổi điều khoản</b></li>
+    Điều khoản có thể được cập nhật hoặc chỉnh sửa bất cứ lúc nào mà không cần báo trước.
+    Việc tiếp tục sử dụng trò chơi sau khi cập nhật đồng nghĩa với việc bạn chấp nhận điều khoản mới.
+    <li></li><b>10. Liên hệ & hỗ trợ</b></li>
+    Nhà phát triển: Lù A Vangg
+    Email hỗ trợ: lauavang2009@gmail.com
+    <br>Thời gian làm việc:<br>
+    Sáng: 08:00 – 11:00
+    Chiều: 13:00 – 19:00
+    <br>Thứ 2 – Thứ 6
+    <li><b>*Lưu ý*</b> Mọi người chơi phải tuân thủ những điều khoản trên. Nếu không tuân thủ chúng tôi có quyền tạm khóa hoặc khóa vĩnh viễn tài khoản.</li>
+        </ul>
+        <div class="mt-4 flex items-center gap-2">
+            <input type="checkbox" id="terms-check" class="w-4 h-4 accent-red-600">
+            <label for="terms-check" class="text-xs font-bold text-red-800 cursor-pointer">Tôi đã đọc và đồng ý với tất cả điều khoản.</label>
+        </div>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="acceptTerms()" class="btn-tet flex-1">XÁC NHẬN</button>
+    </div>
+</div>
+
+<!-- AUTHENTICATION OVERLAY -->
+<div id="auth-overlay" class="fixed inset-0 flex items-center justify-center z-[5000] bg-[#450a0a]">
+    <div class="auth-card p-8 text-center" id="auth-main-card">
+        <h1 class="text-3xl font-bold text-red-700 mb-2 italic">Lễ Hội XÁO TRỘN 2026</h1>
+        <p class="text-[10px] text-gray-400 mb-6 font-bold uppercase tracking-[2px]">Bảo mật bởi AI Security</p>
+
+        <div id="auth-nav" class="flex justify-center gap-2 mb-6 bg-gray-100 p-1 rounded-full">
+            <button id="tab-login" onclick="switchAuthTab('login')" class="tab-btn active w-1/2">ĐĂNG NHẬP</button>
+            <button id="tab-reg" onclick="switchAuthTab('reg')" class="tab-btn w-1/2">ĐĂNG KÝ</button>
+        </div>
+
+        <div id="login-form" class="space-y-4">
+            <input type="text" id="log-id" placeholder="Email hoặc Tên / SĐT" class="input-elegant">
+            <input type="password" id="log-pass" placeholder="Mật khẩu" class="input-elegant">
+            <button onclick="handleAuth('login')" class="btn-tet w-full">VÀO TRÒ CHƠI</button>
+            <p onclick="switchAuthTab('forgot')" class="text-xs text-red-600 font-bold cursor-pointer hover:underline mt-2">Quên mật khẩu?</p>
+        </div>
+
+        <div id="reg-form" class="hidden space-y-3">
+            <input type="text" id="reg-user" placeholder="Tên hiển thị (Duy nhất)" class="input-elegant">
+            <input type="text" id="reg-contact" placeholder="Email hoặc Số điện thoại" class="input-elegant">
+            <input type="password" id="reg-pass" placeholder="Mật khẩu" class="input-elegant">
+            <input type="password" id="reg-pass-confirm" placeholder="Nhập lại mật khẩu" class="input-elegant">
+            <button onclick="showTerms()" class="btn-tet w-full">ĐĂNG KÝ NGAY</button>
+        </div>
+
+        <div id="forgot-form" class="hidden space-y-4 text-left">
+            <div id="forgot-step-1">
+                <input type="text" id="forgot-id" placeholder="Email hoặc Số điện thoại" class="input-elegant mb-3">
+                <button onclick="requestOTP()" class="btn-tet w-full">CẤP MÃ XÁC THỰC AI</button>
+            </div>
+            <div id="forgot-step-2" class="hidden space-y-3">
+                <input type="text" id="otp-input" placeholder="Nhập mã OTP" class="input-elegant text-center tracking-[10px] font-black">
+                <input type="password" id="new-pass" placeholder="Mật khẩu mới" class="input-elegant">
+                <button onclick="handleResetPassword()" class="btn-tet w-full">CẬP NHẬT MẬT KHẨU</button>
+            </div>
+            <p onclick="switchAuthTab('login')" class="text-center text-xs text-gray-400 font-bold cursor-pointer mt-4">Quay lại</p>
+        </div>
+    </div>
+</div>
+
+<!-- ADMIN CONTROL PANEL -->
+<div id="admin-modal" class="admin-modal">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-indigo-900 uppercase italic">Admin Supreme Console</h2>
+        <button onclick="toggleAdminPanel(false)" class="text-2xl">&times;</button>
+    </div>
+    <div class="flex-1 overflow-hidden flex flex-col gap-3">
+        <div id="admin-console">
+            <div>[System] Khởi tạo hệ thống quản trị...</div>
+            <div>[Status] Chưa kích hoạt Admin</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="adminAction('addscore')" class="bg-indigo-600 text-white text-[10px] p-2 rounded-lg font-bold">+100,000 ĐIỂM</button>
+            <button onclick="adminAction('resetall')" class="bg-red-600 text-white text-[10px] p-2 rounded-lg font-bold">RESET HỆ THỐNG</button>
+            <button onclick="adminAction('listusers')" class="bg-gray-700 text-white text-[10px] p-2 rounded-lg font-bold">LIỆT KÊ USER</button>
+            <button onclick="adminAction('unbanall')" class="bg-green-600 text-white text-[10px] p-2 rounded-lg font-bold">GỠ KHÓA TẤT CẢ</button>
+        </div>
+        <input type="text" id="admin-cmd-input" placeholder="Gõ lệnh trực tiếp (vd: ban username / reveal user)" class="w-full bg-black text-green-400 p-2 text-xs border-none outline-none rounded">
+        <p class="text-xs opacity-60 mt-1">Lệnh `reveal <user>` → chỉ **Luavang** được dùng; hệ thống sẽ tạo mật khẩu tạm (8 ký tự) và hiển thị cho Admin.</p>
+    </div>
+</div>
+
+<!-- GAME UI -->
+<div id="ui-layer" class="hidden fixed inset-0 z-1000 pointer-events-none">
+    <div class="absolute top-6 left-6 new-year-gradient p-4 rounded-2xl pointer-events-auto min-w-[220px]">
+        <div class="flex items-center gap-3 mb-2">
+            <div id="user-avatar" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xl shadow-inner border-2 border-red-200 cursor-pointer">🏮</div>
+            <div>
+                <div class="flex items-center">
+                    <p id="ui-user" class="font-bold text-red-900 text-lg leading-tight"></p>
+                    <span id="admin-indicator" class="admin-tag hidden">ADMIN</span>
+                </div>
+                <div class="flex items-center">
+                    <span id="ui-rank-tag" class="text-[9px] font-black text-white bg-red-800 px-2 py-0.5 rounded-full">...</span>
+                    <span class="status-shield status-ok uppercase">AI Active</span>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-1">
+            <div class="flex justify-between text-red-900/80 font-bold text-xs">
+                <span>Số điểm:</span>
+                <span id="ui-score" class="text-red-700 font-black">0</span>
+            </div>
+            <div class="flex justify-between text-red-900/80 font-bold text-xs">
+                <span>Kỷ lục:</span>
+                <span id="ui-high" class="text-amber-800 text-lg font-black">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute top-6 right-6 flex gap-3 pointer-events-auto">
+        <button id="admin-btn" onclick="toggleAdminPanel(true)" class="admin-only bg-indigo-900 text-white px-5 py-2 text-xs font-bold rounded-full border-none cursor-pointer hover:bg-black">QUẢN TRỊ</button>
+        <button onclick="toggleLeaderboard(true)" class="new-year-gradient px-5 py-2 text-white text-xs font-bold rounded-full border-none cursor-pointer">BẢNG VÀNG</button>
+        <button onclick="logout()" class="bg-white/20 backdrop-blur-md text-white px-5 py-2 rounded-full text-xs font-bold border border-white/30 transition-all cursor-pointer">ĐĂNG XUẤT</button>
+    </div>
+
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 text-center w-full">
+        <h2 id="main-msg" class="text-6xl font-bold text-yellow-400 mb-4 drop-shadow-xl"></h2>
+    </div>
+
+    <!-- START BUTTON moved slightly lower (bottom: 80px) -->
+    <div class="fixed left-1/2 -translate-x-1/2 pointer-events-auto start-btn-wrapper">
+        <button id="start-btn" onclick="startShuffle()" class="btn-tet px-20 py-6 text-2xl shadow-2xl">BẮT ĐẦU TRÁO CỐC</button>
+    </div>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div id="leader-modal" class="leaderboard-modal">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-red-700 uppercase italic">Bảng Vàng Danh Vọng</h2>
+            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Cập nhật bởi AI 24/7</p>
+        </div>
+        <button onclick="toggleLeaderboard(false)" class="text-3xl text-gray-300 hover:text-red-600 font-bold cursor-pointer">&times;</button>
+    </div>
+    <div id="leader-list" class="flex-1 overflow-y-auto pr-1"></div>
+</div>
+
+<script type="module">
+/* ------------------ FIREBASE / DB IMPORT ------------------ */
+import {
+  app, db, auth,
+  registerUser, loginUser, logoutUser,
+  getUserData, updateUserField, getAllUsers,
+  resetPassword, onAuthReady, listenAuth,
+  // admin helpers
+  getUserByUsername, setBanByUsername, setRoleByUsername, smartLogin
+} from "./firebase.mjs";
+// expose smartLogin để dùng trong HTML
+window.smartLogin = smartLogin;
+
+window.handleAuth = async function (type) {
+  if (type !== "login") return;
+
+  const input = document.getElementById("log-id")?.value.trim();
+  const password = document.getElementById("log-pass")?.value;
+
+  if (!input || !password) {
+    alert("❌ Nhập thiếu thông tin");
+    return;
+  }
+
+  try {
+    await window.smartLogin(input, password);
+    alert("✅ Đăng nhập thành công");
+  } catch (e) {
+    alert(e.message || "❌ Sai tài khoản hoặc mật khẩu");
+  }
+};
+
+let FS = {};
+try {
+    const mod = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js');
+    FS = mod;
+} catch (e) {
+    console.warn("Không thể import Firestore client; sẽ dùng memory fallback.", e);
+}
+
+/* ------------------ SYSTEM ------------------ */
+const SYSTEM = {
+    user: null,
+    uid: null,
+    isAdmin: false,
+    score: 0,
+    high: 0,
+    playing: false,
+    shuffling: false,
+    initialized: false,
+    winId: 0
+};
+
+/**
+ * ===============================
+ * AI CORE & SYSTEM PROMPT
+ * ===============================
+ */
+const apiKey = "AIzaSyCpWMMs_dhYAuY4qSTOBzX4WG2YNeo7CCI";
+
+const systemPrompt = `Bạn là trợ lý AI thông minh 'Gemini' lấy tên là "Trợ lý Assistant" trong Lễ Hội Xáo Trộn 2026.
+Nếu có ai hỏi về ai tạo ra bạn hãy nói bạn được Google tạo ra và "Lù A Vangg" tạo ra bạn để hỗ trợ và phát triển thêm.
+
+Luật chơi:
+- Trò chơi đoán bóng dưới cốc
+- Có 3 cốc, AI sẽ tráo cốc
+- Đoán đúng +500đ
+- Đoán sai điểm về 0
+
+Người chơi có thể hỏi:
+- Tài khoản
+- Cách chơi
+- Mẹo thắng
+
+Phong cách:
+- Vui vẻ 😄, lịch sự, nhiệt tình
+- Dùng icon liên quan đến Tết
+- KHÔNG nói thô tục
+- Hỏi ngôn ngữ nào → trả lời ngôn ngữ đó
+
+Nếu người chơi báo lỗi tài khoản → hướng dẫn dùng "Quên mật khẩu".
+Nhưng KHÔNG bao giờ hỏi mật khẩu người chơi hoặc yêu cầu họ cung cấp thông tin nhạy cảm.
+Và tính năng Quên mật khẩu đang trong quá trình phát triển. Hãy kiên nhẫn chờ đợi nhé!
+`;
+
+/**
+ * ===============================
+ * AI CHAT LOGIC (NO SDK – FETCH)
+ * ===============================
+ */
+async function askAI() {
+    const input = document.getElementById("ai-input");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    appendChatBubble(msg, "user");
+    input.value = "";
+
+    showAITyping(); // 👈 HIỆN "Đang soạn tin..."
+
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [
+                        { role: "user", parts: [{ text: msg }] }
+                    ],
+                    systemInstruction: {
+                        role: "system",
+                        parts: [{ text: systemPrompt }]
+                    }
+                })
+            }
+        );
+
+        const data = await res.json();
+        const text =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "🤖 AI đang bận tráo cốc, thử lại nhé!";
+
+        hideAITyping(); // 👈 ẨN "Đang soạn tin..."
+        appendChatBubble(text, "ai");
+    } catch (err) {
+        console.error(err);
+        hideAITyping(); // 👈 ẨN nếu lỗi
+        appendChatBubble(
+            "⚠️ Có lỗi khi kết nối AI. Kiểm tra mạng nhé!",
+            "ai"
+        );
+    }
+}
+
+/**
+ * ===============================
+ * AI UI HELPERS
+ * ===============================
+ */
+function appendChatBubble(text, sender) {
+    const container = document.getElementById("ai-chat-messages");
+    const div = document.createElement("div");
+    div.className = `chat-bubble ${
+        sender === "ai" ? "ai-bubble" : "user-bubble"
+    }`;
+    div.innerText = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function toggleAIChat() {
+    const win = document.getElementById("ai-chat-window");
+    win.style.display = win.style.display === "flex" ? "none" : "flex";
+}
+let aiTypingBubble = null;
+
+function showAITyping() {
+    if (aiTypingBubble) return;
+
+    const container = document.getElementById("ai-chat-messages");
+    aiTypingBubble = document.createElement("div");
+    aiTypingBubble.className = "chat-bubble ai-bubble typing";
+    aiTypingBubble.innerText = "Đang trả lời...";
+    container.appendChild(aiTypingBubble);
+    container.scrollTop = container.scrollHeight;
+}
+
+function hideAITyping() {
+    if (aiTypingBubble) {
+        aiTypingBubble.remove();
+        aiTypingBubble = null;
+    }
+}
+/**
+ * ===============================
+ * EXPOSE TO HTML
+ * ===============================
+ */
+window.askAI = askAI;
+window.toggleAIChat = toggleAIChat;
+
+console.log("🤖 AI Chat READY – fetch mode, no server");
+
+/* ------------------ DATABASE MODULE ------------------ */
+const DB = {
+    mode: 'memory',
+    dbRef: null,
+    usersMemory: [
+        { user: '?', contact: '?', pass: '?', score: 0, high: 0, buff: 0, role: 'USER', banned: false },
+        { user: '?', contact: '?', pass: '?', score: 500, high: 500, buff: 0, role: 'USER', banned: false },
+        { user: 'Luavang', contact: '???', pass: '???', score: 2000, high: 2000, buff: 0, role: 'ADMIN', banned: false }
+    ],
+
+    async init() {
+        if (db) { this.mode = 'firebase'; this.dbRef = db; console.log("DB mode: Firestore"); }
+        else { this.mode = 'memory'; console.warn("DB mode: Memory (fallback)"); }
+    },
+
+    async deleteUser(username) {
+        if (this.mode === 'firebase') {
+            try {
+                if (FS && FS.doc && FS.getDoc && FS.deleteDoc) {
+                    const ref = FS.doc(this.dbRef, "users", username);
+                    const snap = await FS.getDoc(ref);
+                    if (snap && snap.exists()) { await FS.deleteDoc(ref); return true; }
+                }
+                if (FS && FS.collection && FS.query && FS.where && FS.getDocs && FS.writeBatch) {
+                    const qSnap = await FS.getDocs(FS.query(FS.collection(this.dbRef, "users"), FS.where("user", "==", username)));
+                    if (qSnap.empty) return false;
+                    const batch = FS.writeBatch(this.dbRef);
+                    qSnap.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                    return true;
+                }
+                return false;
+            } catch (err) { console.error("deleteUser error:", err); return false; }
+        } else {
+            const idx = this.usersMemory.findIndex(u => u.user === username);
+            if (idx !== -1) { this.usersMemory.splice(idx, 1); return true; }
+            return false;
+        }
+    },
+
+    async getUsers() {
+        if (this.mode === 'firebase') {
+            const snap = await getAllUsers();
+            return snap;
+        } else { return JSON.parse(JSON.stringify(this.usersMemory)); }
+    },
+
+    async getUserById(id) {
+        if (this.mode === 'firebase') {
+            // try get by uid
+            try {
+                const profile = await getUserData(id);
+                if (profile) return profile;
+            } catch (e) {}
+            const all = await this.getUsers();
+            return all.find(x => x.user === id || x.contact === id || x.email === id) || null;
+        } else {
+            const u = this.usersMemory.find(x => x.user === id || x.contact === id);
+            return u ? JSON.parse(JSON.stringify(u)) : null;
+        }
+    },
+
+    async setUser(userObj) {
+        if (this.mode === 'firebase') {
+            const id = userObj.uid || userObj.user || userObj.email;
+            if (!id) throw new Error("Missing id to set user");
+            await FS.setDoc(FS.doc(this.dbRef, "users", id), userObj, { merge: true });
+            return true;
+        } else {
+            const idx = this.usersMemory.findIndex(u => u.user === userObj.user);
+            if (idx === -1) this.usersMemory.push(userObj);
+            else this.usersMemory[idx] = { ...this.usersMemory[idx], ...userObj };
+            return true;
+        }
+    },
+
+    async updateUser(username, field, value) {
+        if (this.mode === 'firebase') {
+            try {
+                if (username && username.length > 20) {
+                    // assume uid
+                    await updateUserField(username, { [field]: value });
+                    return true;
+                } else {
+                    const snaps = await FS.getDocs(FS.query(FS.collection(this.dbRef, "users"), FS.where("user", "==", username)));
+                    if (snaps.empty) return false;
+                    const d = snaps.docs[0];
+                    await FS.updateDoc(d.ref, { [field]: value });
+                    return true;
+                }
+            } catch (err) { console.error("updateUser error:", err); return false; }
+        } else {
+            const u = this.usersMemory.find(x => x.user === username);
+            if (!u) return false;
+            u[field] = value;
+            return true;
+        }
+    },
+
+    async saveUsers(usersArray) {
+        if (this.mode === 'firebase') { return false; }
+        else { this.usersMemory = JSON.parse(JSON.stringify(usersArray)); return true; }
+    },
+
+    async deleteAllUsers() {
+        if (this.mode === 'firebase') {
+            console.warn("deleteAllUsers not supported in firebase mode here");
+            return false;
+        } else { this.usersMemory = []; return true; }
+    }
+};
+/* ================= DB WRAPPER ================= */
+
+DB.getUsers = async function () {
+    if (DB.mode === 'firebase') {
+        const all = await getAllUsers();
+
+        // 🔒 ẨN ADMIN NGAY TỪ DB
+        return all.filter(u => {
+            if (!u) return false;
+
+            // theo role
+            if (String(u.role).toUpperCase() === "ADMIN") return false;
+
+            // fallback username cứng (Luavang)
+            if (u.user === "Luavang") return false;
+
+            return true;
+        });
+    }
+
+    // nếu sau này có local/memory
+    return [];
+};
+/* ------------------ HELPERS (UI) ------------------ */
+function showMsg(txt, type = 'info') {
+    const el = document.getElementById('msg-alert');
+    const icon = document.getElementById('ai-msg-icon');
+    document.getElementById('msg-alert-text').innerText = txt;
+    el.style.background = type === 'error' ? 'linear-gradient(135deg, #7f1d1d, #ef4444)' : '';
+    icon.innerText = type === 'error' ? '⚠️' : '🤖';
+    el.style.transform = "translateX(0)";
+    setTimeout(() => el.style.transform = "translateX(450px)", 4500);
+}
+
+function switchAuthTab(type) {
+    document.getElementById('login-form').classList.toggle('hidden', type !== 'login');
+    document.getElementById('reg-form').classList.toggle('hidden', type !== 'reg');
+    document.getElementById('forgot-form').classList.toggle('hidden', type !== 'forgot');
+    document.getElementById('auth-nav').classList.toggle('hidden', type === 'forgot');
+    if(type !== 'forgot') {
+        document.getElementById('tab-login').classList.toggle('active', type === 'login');
+        document.getElementById('tab-reg').classList.toggle('active', type === 'reg');
+    }
+}
+
+function enableUILayer(enable = true) {
+    const uiLayer = document.getElementById('ui-layer');
+    if(!uiLayer) return;
+    if(enable) { uiLayer.classList.remove('hidden'); }
+    else { uiLayer.classList.add('hidden'); }
+}
+
+/* ------------------ AUTH (LOGIN / REGISTER) ------------------ */
+async function handleAuth(type) {
+  if (type === 'login') {
+    const id = document.getElementById('log-id').value.trim();
+    const pass = document.getElementById('log-pass').value;
+    if (!id || !pass) return showMsg("Vui lòng điền đầy đủ thông tin!", "error");
+
+    // If Firebase and using email -> use firebase auth
+    if (DB.mode === 'firebase') {
+    try {
+        const fbUser = await smartLogin(id, pass); // email / user / sdt
+        const profile = await getUserData(fbUser.uid);
+        if (!profile) return showMsg("Tài khoản không tồn tại trong hệ thống", "error");
+
+        SYSTEM.uid = fbUser.uid;
+        SYSTEM.user = profile.username || profile.user || 'Player';
+        SYSTEM.score = profile.score || 0;
+        SYSTEM.high = profile.high || 0;
+        SYSTEM.isAdmin = profile.role === 'ADMIN';
+
+        document.getElementById('auth-overlay').style.display = 'none';
+        enableUILayer(true);
+
+        const uiUserEl = document.getElementById('ui-user');
+        const rankTag  = document.getElementById('ui-rank-tag');
+
+        // 🔥 GIỮ NGUYÊN ADMIN LUAVANG
+        if (SYSTEM.user === "Luavang") {
+        uiUserEl.innerText = "Luavang 👑";
+        rankTag.innerText = "ADMIN";
+        } else {
+        uiUserEl.innerText = SYSTEM.user;
+        }
+
+        document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+        document.getElementById('ui-high').innerText  = SYSTEM.high.toLocaleString();
+
+        if (SYSTEM.isAdmin) {
+        document.body.classList.add('is-admin');
+        document.getElementById('admin-indicator').classList.remove('hidden');
+        document.getElementById('user-avatar').innerText = "👑";
+        showMsg("Chào mừng Admin!", "info");
+        } else {
+        document.getElementById('user-avatar').innerText = "🏮";
+        showMsg(`Chào mừng ${SYSTEM.user}!`, "info");
+        }
+
+        updateRank();
+        init3D();
+        return;
+    } catch (err) {
+        console.error("Firebase login error:", err);
+        return showMsg(err.message || "Đăng nhập thất bại", "error");
+    }
+    }
+
+    // fallback memory login
+    let userData = await DB.getUserById(id);
+    if(!userData) {
+        const all = await DB.getUsers();
+        userData = all.find(u => u.contact === id || u.user === id);
+    }
+    if(!userData) return showMsg("Tài khoản hoặc mật khẩu không đúng!", "error");
+    if (userData.pass !== pass) return showMsg("Tài khoản hoặc mật khẩu không đúng!", "error");
+    if (userData.banned === true) return showMsg("Tài khoản của bạn đã bị khóa vĩnh viễn!", "error");
+    if (typeof userData.banned === "number" && userData.banned > Date.now()) {
+      const mins = Math.ceil((userData.banned - Date.now()) / 60000);
+      return showMsg(`Tài khoản đang bị khóa tạm thời. Thử lại sau ${mins} phút.`, "error");
+    }
+
+    SYSTEM.user = userData.user;
+    SYSTEM.score = userData.score || 0;
+    SYSTEM.high = userData.high || 0;
+    SYSTEM.isAdmin = userData.role === "ADMIN";
+
+    document.getElementById('auth-overlay').style.display = 'none';
+    enableUILayer(true);
+
+    const uiUserEl = document.getElementById('ui-user');
+    uiUserEl.innerText = SYSTEM.user === "Luavang" ? "Luavang 👑" : SYSTEM.user;
+
+    document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+    document.getElementById('ui-high').innerText = SYSTEM.high.toLocaleString();
+
+    if (SYSTEM.isAdmin) {
+        document.body.classList.add('is-admin');
+        document.getElementById('admin-indicator').classList.remove('hidden');
+        document.getElementById('user-avatar').innerText = "👑";
+        showMsg("Chào mừng Admin!", "info");
+    } else {
+        document.getElementById('user-avatar').innerText = "🏮";
+        showMsg(`Chào mừng ${SYSTEM.user}!`, "info");
+    }
+
+    updateRank();
+    init3D();
+  }
+  if (type === 'reg') {
+    const user = document.getElementById('reg-user').value.trim();
+    const contact = document.getElementById('reg-contact').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+    const passC = document.getElementById('reg-pass-confirm').value;
+
+    if (!user || !contact || !pass) return showMsg("Vui lòng điền đầy đủ thông tin!", "error");
+    if (pass !== passC) return showMsg("Mật khẩu nhập lại không khớp!", "error");
+
+    if (DB.mode === 'firebase' && contact.includes("@")) {
+        try {
+            const fbUser = await registerUser(contact, pass, user);
+            const profile = await getUserData(fbUser.uid);
+            if (profile) {
+                SYSTEM.uid = fbUser.uid;
+                SYSTEM.user = profile.user || profile.username || user;
+                SYSTEM.score = profile.score || 0;
+                SYSTEM.high = profile.high || 0;
+                SYSTEM.isAdmin = profile.role === "ADMIN";
+                document.getElementById('auth-overlay').style.display = 'none';
+                enableUILayer(true);
+                document.getElementById('ui-user').innerText = SYSTEM.user;
+                document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+                document.getElementById('ui-high').innerText = SYSTEM.high.toLocaleString();
+                showMsg("Đăng ký thành công! Đã đăng nhập tự động.", "info");
+                updateRank();
+                init3D();
+            } else {
+                showMsg("Đăng ký thành công! Hãy đăng nhập bằng email.", "info");
+                switchAuthTab('login');
+            }
+            return;
+        } catch (err) {
+            console.error("Firebase register error:", err);
+            return showMsg("Đăng ký thất bại: " + (err.message || err), "error");
+        }
+    }
+
+    const exists = await DB.getUserById(user);
+    if (exists) return showMsg("Tên này đã tồn tại!", "error");
+
+    const userObj = { user, contact, pass, score: 0, high: 0, buff: 0, role: "USER", banned: false };
+    await DB.setUser(userObj);
+    showMsg("Đăng ký thành công!", "info");
+    switchAuthTab('login');
+  }
+}
+
+function showTerms() {
+    const u = document.getElementById('reg-user').value.trim();
+    if(!u) return showMsg("Vui lòng điền thông tin!", "error");
+    document.getElementById('terms-modal').style.display = 'flex';
+}
+function acceptTerms() {
+    if(!document.getElementById('terms-check').checked) return showMsg("Bạn phải đồng ý điều khoản!", "error");
+    document.getElementById('terms-modal').style.display = 'none';
+    handleAuth('reg');
+}
+async function logout(){ 
+    if (DB.mode === 'firebase') {
+        try { await logoutUser(); } catch (e) { console.warn("logoutUser error", e); }
+    }
+    enableUILayer(false); 
+    location.reload(); 
+}
+
+/* ====== Admin session và shortcut (AN TOÀN) ====== */
+let ADMIN_SESSION = { active: false, until: 0 };
+
+// quản lý modifier key an toàn
+let shiftHeld = false;
+let altHeld = false;
+let modifierHeld = false;
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Shift') shiftHeld = true;
+  if (e.key === 'Alt') altHeld = true;
+  modifierHeld = shiftHeld && altHeld;
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'Shift') shiftHeld = false;
+  if (e.key === 'Alt') altHeld = false;
+  modifierHeld = shiftHeld && altHeld;
+});
+
+// click
+let avatarClicks = 0;
+let avatarTimer = 0;
+
+const avatarEl = document.getElementById('user-avatar');
+if (avatarEl) {
+  avatarEl.addEventListener('click', () => {
+    // nếu không phải Luavang không có quyền admin
+    if (!isLuavang()) {
+      avatarClicks = 0; // reset tránh rác trạng thái
+      return;
+    }
+
+    const now = Date.now();
+    if (now - avatarTimer > 3000) avatarClicks = 0;
+    avatarTimer = now;
+    avatarClicks++;
+
+    // nếu người dùng
+    if (modifierHeld && avatarClicks >= 7) {
+      ADMIN_SESSION.active = true;
+      ADMIN_SESSION.until = Date.now() + (10 * 60 * 1000); // 10 phút
+      SYSTEM.isAdmin = true;
+      document.body.classList.add('is-admin');
+      const ind = document.getElementById('admin-indicator');
+      if (ind) ind.classList.remove('hidden');
+      adminLog("Admin đã được kích hoạt.");
+      showMsg("Admin kích hoạt thành công.", "info");
+      avatarClicks = 0;
+    }
+  });
+} else {
+  console.warn("user-avatar element not found — admin shortcut disabled");
+}
+
+/* isAdminActive và toggleAdminPanel */
+function isAdminActive() {
+  if (!ADMIN_SESSION?.active) return false;
+  if (Date.now() > ADMIN_SESSION.until) {
+    ADMIN_SESSION.active = false;
+    SYSTEM.isAdmin = false;
+    document.body.classList.remove('is-admin');
+    const ind = document.getElementById('admin-indicator');
+    if (ind) ind.classList.add('hidden');
+    adminLog("Phiên Admin đã hết hạn.");
+    return false;
+  }
+  return true;
+}
+
+function toggleAdminPanel(show) {
+    if (show && !isLuavang()) {
+        showMsg("❌ Chỉ Luavang được truy cập Admin", "error");
+        adminLog("❌ User không hợp lệ cố mở Admin");
+        return;
+    }
+    if (show && window.innerWidth <= 768) {
+        showMsg("Bảng điều khiển chỉ xuất hiện trên PC.", "error");
+        return;
+    }
+    if(show && !isAdminActive()) {
+        return showMsg("❌ Quyền hạn không đủ hoặc đã hết hạn!", "error");
+    }
+    document.getElementById('admin-modal').style.display = show ? 'flex' : 'none';
+}
+function adminLog(msg) {
+    const con = document.getElementById('admin-console');
+    const div = document.createElement('div');
+    div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    con.appendChild(div);
+    con.scrollTop = con.scrollHeight;
+}
+function isLuavang() {
+    return SYSTEM.user === "Luavang";
+}
+
+/* ------------------ ADMIN ACTIONS (kept) ------------------ */
+async function adminAction(type = '', data = '') {
+    const user = SYSTEM.user || 'UNKNOWN';
+    const cmd  = String(type).toLowerCase().trim();
+    if (!isLuavang()) {
+        adminLog(`❌ ${SYSTEM.user} bị chặn — không phải Luavang`);
+        showMsg("❌ Lệnh không hợp lệ", "error");
+        return;
+    }
+    type = String(type).toLowerCase().trim();
+    if (!isAdminActive()) { adminLog("❌ Không có quyền Admin hoặc phiên đã hết hạn"); return; }
+    const users = await DB.getUsers();
+    function findUser(username) { return users.find(u => u.user === username); }
+
+    switch (type) {
+        case "addscore": {
+            SYSTEM.score += 100000; SYSTEM.high = Math.max(SYSTEM.high, SYSTEM.score);
+            if (DB.mode === 'firebase' && SYSTEM.uid) {
+                await updateUserField(SYSTEM.uid, { score: SYSTEM.score, high: SYSTEM.high });
+            } else {
+                await DB.updateUser(SYSTEM.user, "score", SYSTEM.score);
+                await DB.updateUser(SYSTEM.user, "high", SYSTEM.high);
+            }
+            document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+            document.getElementById('ui-high').innerText = SYSTEM.high.toLocaleString();
+            adminLog("✔ +100,000 điểm cho Admin"); updateRank(); break;
+        }
+        case 'clearscore': {
+            const targetUser = data && data.trim() ? data.trim() : SYSTEM.user;
+            const usersList = await DB.getUsers();
+            const u = usersList.find(x => x.user === targetUser);
+            if (!u) { adminLog(`❌ Không tìm thấy user: ${targetUser}`); break; }
+            if (!confirm(`⚠️ XÓA TOÀN BỘ ĐIỂM CỦA "${targetUser}" ?`)) { adminLog('⛔ Đã hủy xóa điểm'); break; }
+            if (DB.mode === 'firebase' && u.uid) await updateUserField(u.uid, { score: 0, high: 0, buff: 0 });
+            else await DB.updateUser(targetUser, 'score', 0), await DB.updateUser(targetUser, 'high', 0), await DB.updateUser(targetUser, 'buff', 0);
+            if (targetUser === SYSTEM.user) { SYSTEM.score = 0; SYSTEM.high = 0; document.getElementById('ui-score').innerText = '0'; document.getElementById('ui-high').innerText = '0'; }
+            adminLog(`🧹 Đã xóa toàn bộ điểm của: ${targetUser}`); showMsg(`Đã xóa điểm của ${targetUser}`, 'info'); updateRank(); break;
+        }
+        case "delete": {
+            const target = (data || '').trim(); if (!target) { adminLog("Thiếu username. Dùng: delete <user>"); break; }
+            if (target === SYSTEM.user) { adminLog("❌ Không thể tự xóa chính mình."); break; }
+            if (!confirm(`⚠️ XÓA VĨNH VIỄN USER "${target}" ?\nKHÔNG THỂ KHÔI PHỤC!`)) { adminLog("Đã hủy xóa user."); break; }
+            const ok = await DB.deleteUser(target);
+            if (ok) { adminLog(`🔥 Đã xóa vĩnh viễn user: ${target}`); showMsg(`Đã xóa user ${target}`, "info"); } else { adminLog(`❌ Không tìm thấy user: ${target}`); showMsg(`Không tìm thấy user ${target}`, "error"); }
+            updateRank(); break;
+        }
+        case "listusers": { adminLog("===== USER LIST ====="); users.forEach(u => adminLog(`${u.user} | Score:${u.score||0} | High:${u.high||0} | Role:${u.role||"USER"} | Banned:${u.banned}`)); break; }
+        case "resetall": {
+        if (!confirm("⚠ RESET TOÀN BỘ HỆ THỐNG?\nXÓA HẾT USER + ĐIỂM + AUTH")) {
+            adminLog("⛔ Hủy reset");
+            break;
+        }
+
+        try {
+            const res = await resetSystemCloud();
+            adminLog(res.data.message);
+            showMsg("🔥 Hệ thống đã được reset", "success");
+            setTimeout(() => location.reload(), 1500);
+        } catch (e) {
+            adminLog("❌ Reset thất bại: " + e.message);
+            showMsg("Reset thất bại", "error");
+        }
+        break;
+        }
+        case "unbanall": { for (const u of users) { if (DB.mode === 'firebase' && u.uid) await updateUserField(u.uid, { banned: false }); else await DB.updateUser(u.user, "banned", false); } adminLog("✔ Đã gỡ ban toàn bộ user"); updateRank(); break; }
+        case "ban": { const username = data.trim(); const u = findUser(username); if (!u) { adminLog("❌ Không tìm thấy user: " + username); break; } if (DB.mode === 'firebase' && u.uid) await updateUserField(u.uid, { banned: true }); else await DB.updateUser(username, "banned", true); adminLog(`⛔ Đã khóa VĨNH VIỄN: ${username}`); updateRank(); break; }
+        case "tempban": { const [username, hoursStr] = data.split(" "); const hours = Number(hoursStr); if (!username || isNaN(hours)) { adminLog("❌ Dùng: tempban <user> <giờ>"); break; } const u2 = findUser(username); if (!u2) { adminLog("❌ Không tìm thấy user: " + username); break; } const until = Date.now() + hours * 3600000; if (DB.mode === 'firebase' && u2.uid) await updateUserField(u2.uid, { banned: until }); else await DB.updateUser(username, "banned", until); adminLog(`⏳ Khóa ${username} trong ${hours} giờ`); updateRank(); break; }
+        case "role": { const [username, role] = data.split(" "); if (!username || !role) { adminLog("❌ Dùng: role <user> <ADMIN|USER>"); break; } const u3 = findUser(username); if (!u3) { adminLog("❌ Không tìm thấy user"); break; } const r = role.toUpperCase(); if (!["ADMIN", "USER"].includes(r)) { adminLog("❌ Role không hợp lệ"); break; } if (DB.mode === 'firebase' && u3.uid) await updateUserField(u3.uid, { role: r }); else await DB.updateUser(username, "role", r); adminLog(`✔ ${username} → ROLE = ${r}`); updateRank(); break; }
+        case "stats": { const username = data.trim(); const u = findUser(username); if (!u) { adminLog("❌ Không tìm thấy user: " + username); break; } adminLog(`📊 ${u.user} | Score: ${u.score||0} | High: ${u.high||0} | Buff: ${u.buff||0}`); break; }
+        case "export": { adminLog("===== EXPORT USERS ====="); users.forEach(u => adminLog(JSON.stringify(u))); break; }
+        case "wipe": { const username = data.trim(); const u = findUser(username); if (!u) { adminLog("❌ Không tìm thấy user"); break; } if (DB.mode === 'firebase' && u.uid) await updateUserField(u.uid, { score: 0, high: 0, buff: 0, banned: false }); else await DB.setUser({ ...u, score: 0, high: 0, buff: 0, banned: false }); adminLog(`🧹 Đã reset dữ liệu user: ${username}`); updateRank(); break; }
+        case "buff": { let targetUser = SYSTEM.user; let amount = 0; const parts = data.split(" ").filter(Boolean); if (parts.length === 1) amount = Number(parts[0]); else if (parts.length === 2) { targetUser = parts[0]; amount = Number(parts[1]); } else { adminLog("❌ Dùng: buff <số> HOẶC buff <user> <số>"); break; } if (isNaN(amount) || amount <= 0) { adminLog("❌ Số buff không hợp lệ"); break; } const users2 = await DB.getUsers(); const u = users2.find(x => x.user === targetUser); if (!u) { adminLog("❌ Không tìm thấy user: " + targetUser); break; } const newBuff = (u.buff || 0) + amount; const newScore = (u.score || 0) + amount; const newHigh = Math.max(u.high || 0, newScore); if (DB.mode === 'firebase' && u.uid) { await updateUserField(u.uid, { buff: newBuff, score: newScore, high: newHigh }); } else { await DB.updateUser(targetUser, "buff", newBuff); await DB.updateUser(targetUser, "score", newScore); await DB.updateUser(targetUser, "high", newHigh); } if (targetUser === SYSTEM.user) { SYSTEM.score = newScore; SYSTEM.high = newHigh; document.getElementById('ui-score').innerText = newScore.toLocaleString(); document.getElementById('ui-high').innerText = newHigh.toLocaleString(); } adminLog(`✨ BUFF ${amount.toLocaleString()} cho ${targetUser}`); updateRank(); break; }
+        case "userinfo": { const username = data.trim(); const u = findUser(username); if (!u) { adminLog("❌ Không tìm thấy user: " + username); break; } adminLog("===== USER INFO ====="); Object.keys(u).forEach(k => adminLog(`${k}: ${JSON.stringify(u[k])}`)); break; }
+
+        case "resetall": {
+        if (!confirm("⚠️ RESET TOÀN BỘ HỆ THỐNG?")) break;
+        await resetSystemSoft(SYSTEM.uid);
+        adminLog("🔥 RESET HỆ THỐNG (SOFT) THÀNH CÔNG");
+        showMsg("Hệ thống đã được reset", "info");
+        updateRank();
+        break;
+        }
+        case "unban": { const username = data.trim(); const u = findUser(username); if (!u) { adminLog("❌ Không tìm thấy user: " + username); break; } if (DB.mode === 'firebase' && u.uid) await updateUserField(u.uid, { banned: false }); else await DB.updateUser(username, "banned", false); adminLog(`✔ Đã mở khóa: ${username}`); updateRank(); break; }
+
+        default:
+            adminLog("❌ Lệnh không hợp lệ: " + type);
+    }
+}
+
+/* helper: generate temporary password */
+function generateTempPassword(len = 8) {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let s = "";
+    for (let i=0;i<len;i++) s += chars.charAt(Math.floor(Math.random()*chars.length));
+    return s;
+}
+// ===== COMMAND LOG SYSTEM =====
+function pushCmdLog({ time, user, cmd, args, status }) {
+    const logLine = `[${new Date(time).toLocaleString()}] ${status} | ${user} → ${cmd} ${args || ''}`;
+    console.log(logLine);
+    const con = document.getElementById('admin-console');
+    if (con) {
+        const div = document.createElement('div');
+        div.textContent = logLine;
+        con.appendChild(div);
+        con.scrollTop = con.scrollHeight;
+    }
+}
+function setCrownFavicon() {
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <text y="0.9em" font-size="90">👑</text>
+    </svg>
+    `;
+    const link = document.querySelector("link[rel='icon']") || document.createElement("link");
+    link.rel = "icon";
+    link.type = "image/svg+xml";
+    link.href = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    document.head.appendChild(link);
+}
+document.getElementById('admin-cmd-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const val = e.target.value.trim();
+        if(!val) return;
+        const parts = val.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const arg = parts.slice(1).join(' ');
+        e.target.value = "";
+        if (!isLuavang()) {
+            adminLog(`❌ ${SYSTEM.user || "UNKNOWN"} nhập lệnh trái phép`);
+            showMsg("❌ Lệnh không hợp lệ", "error");
+            return;
+        }
+        adminAction(cmd, arg);
+        e.target.value = "";
+    }
+});
+
+/* ------------------ 3D / GAME ------------------ */
+let scene, camera, renderer, ball, hats = [];
+function init3D() {
+    if(SYSTEM.initialized) return;
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x5e0b0b);
+    scene.fog = new THREE.Fog(0x5e0b0b, 15, 40);
+
+    camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 8, 20);
+    camera.lookAt(0, 2, 0);
+
+    renderer = new THREE.WebGLRenderer({ antialias: window.innerWidth > 768, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient);
+    const light = new THREE.PointLight(0xffeebb, 1, 100);
+    light.position.set(5, 15, 10);
+    light.castShadow = true;
+    scene.add(light);
+
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(20, 32), new THREE.MeshStandardMaterial({ color: 0x3d0808, roughness: 0.2 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const hatGeo = new THREE.CylinderGeometry(1.5, 1.8, 3.5, 32, 1, true);
+    const hatMat = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, metalness: 0.6, roughness: 0.2, clearcoat: 1 });
+    const topMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8 });
+
+    hats = [];
+    for(let i=0; i<3; i++){
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(hatGeo, hatMat);
+        body.position.y = 1.75;
+        body.castShadow = true;
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 32), topMat);
+        top.position.y = 3.5;
+        group.add(body, top);
+        group.position.x = (i - 1) * 6;
+        group.userData.id = i;
+        hats.push(group);
+        scene.add(group);
+    }
+
+    ball = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32), new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0x555500 }));
+    ball.castShadow = true;
+    ball.visible = false;
+    scene.add(ball);
+
+    SYSTEM.initialized = true;
+    animate3D();
+}
+function animate3D(){ requestAnimationFrame(animate3D); if(renderer && camera) renderer.render(scene, camera); }
+
+/* ------------------ GAME PLAY ------------------ */
+async function startShuffle() {
+    if(SYSTEM.shuffling || SYSTEM.playing) return;
+    SYSTEM.playing = true;
+    SYSTEM.shuffling = true;
+    const btn = document.getElementById('start-btn');
+    if (btn) {
+        btn.style.opacity = '0';
+        btn.style.pointerEvents = 'none';
+        btn.style.transform = 'translateY(30px)';
+    }
+    document.getElementById('start-btn')?.classList.add('is-shuffling');
+    const startBtn = document.getElementById('start-btn');
+    startBtn.style.opacity = "0.2";
+    startBtn.style.pointerEvents = "none";
+    document.getElementById('main-msg').innerText = "HÃY QUAN SÁT...";
+
+    SYSTEM.winId = Math.floor(Math.random() * 3);
+    if(hats[SYSTEM.winId]) ball.position.set(hats[SYSTEM.winId].position.x, 0.6, 0);
+    ball.visible = true;
+
+    await gsap.to(hats[SYSTEM.winId].position, { y: 6, duration: 1, ease: "power2.out" });
+    await new Promise(r => setTimeout(r, 1000));
+    await gsap.to(hats[SYSTEM.winId].position, { y: 0, duration: 0.5, ease: "bounce.out" });
+    ball.visible = false;
+
+    let moves = 10 + Math.floor(SYSTEM.score / 500);
+    for(let i=0;i<moves;i++){
+        let a = Math.floor(Math.random()*3);
+        let b = Math.floor(Math.random()*3);
+        while(a===b) b = Math.floor(Math.random()*3);
+
+        const posA = hats[a].position.x;
+        const posB = hats[b].position.x;
+        const duration = Math.max(0.1, 0.4 - (SYSTEM.score / 10000));
+
+        gsap.to(hats[a].position, { x: posB, z: 2, duration: duration });
+        await gsap.to(hats[b].position, { x: posA, z: -2, duration: duration });
+        gsap.to(hats[a].position, { z: 0, duration: 0.1 });
+        gsap.to(hats[b].position, { z: 0, duration: 0.1 });
+    }
+
+    SYSTEM.shuffling = false;
+    document.getElementById('main-msg').innerText = "CHỌN CỐC CÓ BÓNG!";
+}
+
+/* click/touch handling */
+window.addEventListener('mousedown', (e) => {
+    if(!SYSTEM.playing || SYSTEM.shuffling) return;
+    const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(hats, true);
+    if(intersects.length > 0) {
+        let obj = intersects[0].object;
+        while(obj.parent && !hats.includes(obj)) obj = obj.parent;
+        handleChoice(obj);
+    }
+});
+window.addEventListener('touchstart', (e) => {
+    if(!SYSTEM.playing || SYSTEM.shuffling) return;
+    const touch = e.touches[0];
+    const mouse = new THREE.Vector2((touch.clientX / window.innerWidth) * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(hats, true);
+    if(intersects.length > 0) {
+        let obj = intersects[0].object;
+        while(obj.parent && !hats.includes(obj)) obj = obj.parent;
+        handleChoice(obj);
+    }
+}, { passive: true });
+
+async function handleChoice(hat) {
+    SYSTEM.playing = false;
+    ball.position.x = hats[SYSTEM.winId].position.x;
+    ball.visible = true;
+
+    hats.forEach(h => gsap.to(h.position, { y: 6, duration: 0.8, ease: "back.out" }));
+
+    if(hat.userData.id === SYSTEM.winId) {
+        SYSTEM.score += 500;
+        if (DB.mode === 'firebase' && SYSTEM.uid) await updateUserField(SYSTEM.uid, { score: SYSTEM.score, high: Math.max(SYSTEM.high, SYSTEM.score) });
+        else { await DB.updateUser(SYSTEM.user, 'score', SYSTEM.score); await DB.updateUser(SYSTEM.user, 'high', Math.max(SYSTEM.high, SYSTEM.score)); }
+        document.getElementById('main-msg').innerText = "CHÍNH XÁC! +500";
+        document.getElementById('main-msg').style.color = "#4ade80";
+    } else {
+        SYSTEM.score = 0;
+        if (DB.mode === 'firebase' && SYSTEM.uid) await updateUserField(SYSTEM.uid, { score: 0 });
+        else await DB.updateUser(SYSTEM.user, 'score', 0);
+        document.getElementById('main-msg').innerText = "SAI RỒI! TIẾC QUÁ";
+        document.getElementById('main-msg').style.color = "#ef4444";
+    }
+
+    if(SYSTEM.score > SYSTEM.high) {
+        SYSTEM.high = SYSTEM.score;
+        if (DB.mode === 'firebase' && SYSTEM.uid) await updateUserField(SYSTEM.uid, { high: SYSTEM.high });
+        else await DB.updateUser(SYSTEM.user, 'high', SYSTEM.high);
+        document.getElementById('ui-high').innerText = SYSTEM.high.toLocaleString();
+    }
+    document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+    updateRank();
+
+    setTimeout(() => {
+        document.getElementById('main-msg').innerText = "";
+        hats.forEach(h => gsap.to(h.position, { y: 0, duration: 0.5 }));
+        ball.visible = false;
+        document.getElementById('start-btn').style.opacity = "1";
+        document.getElementById('start-btn').style.pointerEvents = "auto";
+    }, 3000);
+}
+
+function isAdminUser(u) {
+    if (!u) return false;
+    if (String(u.role).toUpperCase() === "ADMIN") return true;
+    if (u.user === "Luavang") return true;
+    return false;
+}
+
+/* ------------------ RANKING / LEADERBOARD ------------------ */
+/* helper: getCrown returns HTML for top ranks */
+function getCrown(rank) {
+    if (rank === 1) return `<span class="rank-badge rank-1">👑</span>`;
+    if (rank === 2) return `<span class="rank-badge rank-2">2</span>`;
+    if (rank === 3) return `<span class="rank-badge rank-3">3</span>`;
+    return '';
+}
+
+async function updateRank() {
+    const rawUsers = await DB.getUsers();
+
+    // SORT: giảm dần theo high, sau đó score
+    rawUsers.sort((a, b) => {
+        const highDiff = (b.high || 0) - (a.high || 0);
+        if (highDiff !== 0) return highDiff;
+        return (b.score || 0) - (a.score || 0);
+    });
+
+    const totalUsers = rawUsers.length;
+
+    // vị trí thực (tính cả admin để biết "hạng thật")
+    const realIdx = rawUsers.findIndex(u => u.user === SYSTEM.user); // 0-based
+    const realRank = realIdx !== -1 ? realIdx + 1 : -1;
+
+    const rankTag = document.getElementById('ui-rank-tag');
+
+    // 🔒 ADMIN: KHÔNG CÓ RANK, KHÔNG TAG
+    if (isAdminUser(SYSTEM)) {
+        rankTag.innerText = 'ADMIN';
+    } else if (realIdx === -1) {
+        rankTag.innerText = '...';
+    } else {
+        if (realIdx < 100) {
+            rankTag.innerText = `Hạng ${realRank}`;
+        } else {
+            const totalBeyond = Math.max(1, totalUsers - 100);
+            const idxBeyond = Math.max(0, realIdx - 100);
+            const progress = Math.max(
+                1,
+                Math.min(100, Math.round(((idxBeyond + 1) / totalBeyond) * 100))
+            );
+            rankTag.innerText = `Top ${progress}%`;
+        }
+    }
+
+    // LOẠI ADMIN KHỎI BXH HIỂN THỊ
+    const users = rawUsers.filter(u => !isAdminUser(u));
+
+    const list = document.getElementById('leader-list');
+    list.innerHTML = '';
+
+    /* ===== TOP 100 (HIỂN THỊ) ===== */
+    users.slice(0, 100).forEach((u, i) => {
+        const rank = i + 1;
+        const isMe = u.user === SYSTEM.user;
+        const crown = getCrown(rank);
+        const highText = (u.high || 0).toLocaleString();
+
+        const div = document.createElement('div');
+        div.className = [
+            'leader-row',
+            i < 3 ? 'top-rank' : '',
+            (i >= 3 && i < 10) ? 'top-10-rank' : '',
+            isMe ? 'ring-2 ring-red-500 bg-red-50' : ''
+        ].join(' ').trim();
+
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                ${ crown ? crown : `<span class="font-black text-red-600">#${rank}</span>` }
+                <div>
+                    <p class="font-bold text-gray-800 text-sm">
+                        ${u.user} ${rank <= 3 ? '' : ''}
+                        ${isMe ? '<span class="text-[10px] text-red-600">(Bạn)</span>' : ''}
+                    </p>
+                    <p class="text-[8px] uppercase opacity-50 font-bold">
+                        ${u.role || 'USER'}
+                    </p>
+                </div>
+            </div>
+            <p class="font-black text-amber-600">
+                ${highText}
+            </p>
+        `;
+        list.appendChild(div);
+    });
+
+    /* ===== STICKY "VỊ TRÍ CỦA BẠN" ===== */
+    if (realIdx !== -1 && !isAdminUser(rawUsers[realIdx])) {
+        const u = rawUsers[realIdx];
+        const highText = (u.high || 0).toLocaleString();
+        const crown = getCrown(realRank);
+
+        const boardModal = document.getElementById('leader-modal');
+        if (!boardModal) return;
+
+        let stickyWrap = document.getElementById('my-rank-wrap');
+        if (!stickyWrap) {
+            stickyWrap = document.createElement('div');
+            stickyWrap.id = 'my-rank-wrap';
+            stickyWrap.className = 'my-rank-sticky';
+            boardModal.appendChild(stickyWrap);
+        }
+
+        stickyWrap.innerHTML = '';
+
+        const sticky = document.createElement('div');
+        sticky.className = 'leader-row ring-2 ring-red-500 bg-red-50';
+
+        const showProgress = realIdx >= 100 && totalUsers > 100;
+
+        let percentText = '';
+        let progressHTML = '';
+
+        if (showProgress) {
+            const totalBeyond = Math.max(1, totalUsers - 100);
+            const idxBeyond = Math.max(0, realIdx - 100);
+            const progressValue = Math.max(
+                1,
+                Math.min(100, Math.round(((idxBeyond + 1) / totalBeyond) * 100))
+            );
+
+            percentText = `· Top ${progressValue}%`;
+
+            progressHTML = `
+                <div class="rank-progress">
+                    <div class="rank-progress-bar" style="width:${progressValue}%"></div>
+                </div>
+            `;
+        }
+
+        sticky.innerHTML = `
+            <div class="flex items-center gap-3" style="flex:1">
+                <span class="font-black text-red-600" style="width:48px;text-align:center;">
+                    #${realRank}
+                </span>
+                <div style="flex:1">
+                    <p class="font-bold text-gray-800 text-sm">
+                        ${u.user} ${crown}
+                        <span class="text-[10px] text-red-600">(Bạn)</span>
+                    </p>
+                    <p class="text-[8px] uppercase opacity-50 font-bold mb-1">
+                        ${u.role || 'USER'} ${percentText}
+                    </p>
+                    ${progressHTML}
+                </div>
+            </div>
+            <p class="font-black text-amber-600 ml-3">${highText}</p>
+        `;
+
+        stickyWrap.appendChild(sticky);
+    } else {
+        const existing = document.getElementById('my-rank-wrap');
+        if (existing) existing.remove();
+    }
+}
+
+/* ------------------ Remaining functions & init ------------------ */
+window.toggleAIChat = toggleAIChat;
+window.askAI = askAI;
+window.switchAuthTab = switchAuthTab;
+window.handleAuth = handleAuth;
+window.showTerms = showTerms;
+window.acceptTerms = acceptTerms;
+window.logout = logout;
+window.toggleAdminPanel = toggleAdminPanel;
+window.adminAction = adminAction;
+window.toggleLeaderboard = toggleLeaderboard;
+window.startShuffle = startShuffle;
+
+/* ------------------ RESIZE ------------------ */
+window.addEventListener('resize', () => {
+    if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+});
+function showStartButtonAgain() {
+    const btn = document.getElementById('start-btn');
+    if (btn) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.style.transform = 'translateY(0)';
+    }
+    SYSTEM.shuffling = false;
+}
+
+/* ================== ANTI MOBILE ZOOM ================== */
+// (keeps your original prevention code)
+(function preventDoubleTapZoom(){
+    let lastTouch = 0;
+    document.addEventListener('touchend', function(e){
+        const now = Date.now();
+        if (now - lastTouch <= 300) {
+            e.preventDefault();
+        }
+        lastTouch = now;
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+    document.addEventListener('gestureend', e => e.preventDefault());
+})();
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (e) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, { passive: false });
+
+document.addEventListener('wheel', function (e) {
+    if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
+/* ================= LEADERBOARD TOGGLE ================= */
+window.toggleLeaderboard = function (show) {
+    const modal = document.getElementById("leader-modal");
+    if (!modal) return;
+
+    if (show) {
+        modal.style.display = "flex";
+        updateRank(); // cập nhật BXH mỗi lần mở
+    } else {
+        modal.style.display = "none";
+    }
+};
+function toggleLeaderboard(force) {
+  const modal = document.getElementById("leader-modal");
+  if (!modal) return;
+
+  // force = true / false nếu muốn điều khiển từ code
+  if (typeof force === "boolean") {
+    modal.classList.toggle("hidden", !force);
+  } else {
+    modal.classList.toggle("hidden");
+  }
+
+  // khi mở BXH thì update lại ranking
+  if (!modal.classList.contains("hidden")) {
+    if (typeof updateRank === "function") {
+      updateRank();
+    }
+  }
+}
+
+/* ------------------ RESTORE AUTH ON LOAD ------------------ */
+await DB.init();
+
+onAuthReady(async (payload) => {
+    if (!payload) {
+        // no firebase session — show login overlay
+        document.getElementById('auth-overlay').style.display = 'flex';
+        updateRank(); // show memory-snapshot if any
+        return;
+    }
+    const { auth: fbUser, data: profile } = payload;
+    if (!profile) {
+        document.getElementById('auth-overlay').style.display = 'flex';
+        return;
+    }
+    SYSTEM.uid = fbUser.uid;
+    SYSTEM.user = profile.user || profile.username || fbUser.displayName || 'Player';
+    SYSTEM.score = profile.score || 0;
+    SYSTEM.high = profile.high || 0;
+    SYSTEM.isAdmin = profile.role === "ADMIN";
+
+    document.getElementById('auth-overlay').style.display = 'none';
+    enableUILayer(true);
+
+    document.getElementById('ui-user').innerText = SYSTEM.user === "Luavang" ? "Luavang 👑" : SYSTEM.user;
+    document.getElementById('ui-score').innerText = SYSTEM.score.toLocaleString();
+    document.getElementById('ui-high').innerText = SYSTEM.high.toLocaleString();
+    if (SYSTEM.isAdmin) {
+      document.body.classList.add('is-admin');
+      document.getElementById('admin-indicator').classList.remove('hidden');
+      document.getElementById('user-avatar').innerText = "👑";
+    } else {
+      document.getElementById('user-avatar').innerText = "🏮";
+    }
+
+    updateRank();
+    init3D();
+});
+
+updateRank();
+enableUILayer(false);
+
+</script>
+<footer id="copyright"
+    style="
+        position: fixed;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #ffffff;
+        opacity: 0.8;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        user-select: none;
+        pointer-events: none;
+        z-index: 9999;
+        text-shadow: 0 0 3px rgba(0,0,0,0.6);
+    ">
+    © 2026 Luavang – All Rights Reserved
+</footer>
+</body>
+</html>

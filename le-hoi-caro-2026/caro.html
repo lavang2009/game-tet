@@ -1,0 +1,1444 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Caro Pro - Lễ Hội Xáo Trộn 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap');
+    
+    :root { 
+      --bg: #5e0b0b;
+      --panel: #821111; 
+      --x-color: #facc15;
+      --o-color: #ffffff;
+      --border: #f59e0b;
+    }
+
+    body { 
+      background: var(--bg); 
+      color: #fff; 
+      font-family: 'Quicksand', sans-serif; 
+      margin: 0; 
+      height: 100vh; 
+      overflow: hidden;
+      background-image: radial-gradient(circle at center, #821111 0%, #3d0505 100%);
+    }
+
+    .game-container {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      height: 100vh;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .game-container { 
+        grid-template-columns: 1fr; 
+        grid-template-rows: auto 1fr auto; 
+        overflow-y: auto; 
+        height: auto; 
+      }
+      body { overflow-y: auto; }
+    }
+
+    .panel { 
+      background: var(--panel); 
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 20px; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    
+    .festive-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem;
+      color: #facc15;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .board-wrapper { 
+      overflow: auto; 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      background: rgba(0, 0, 0, 0.2); 
+      border-radius: 20px; 
+      padding: 15px; 
+      border: 2px solid var(--border);
+    }
+
+    #caro-board { 
+      display: grid; 
+      gap: 2px; 
+      background: var(--border); 
+      padding: 3px; 
+      border-radius: 8px; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .cell { 
+      width: 35px; 
+      height: 35px; 
+      background: #4a0808; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 22px; 
+      font-weight: 900; 
+      cursor: pointer; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 2px;
+    }
+
+    .cell:hover { background: #7c1212; transform: scale(1.05); z-index: 10; }
+    .cell.x { color: var(--x-color); text-shadow: 0 0 8px rgba(250, 204, 21, 0.6); }
+    .cell.o { color: var(--o-color); text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); }
+    
+    .cell.win { 
+      background: #facc15 !important; 
+      color: #7c1212 !important; 
+      animation: celebration 0.5s infinite alternate;
+      border-radius: 50%;
+    }
+
+    @keyframes celebration { 
+      from { transform: scale(1) rotate(0deg); } 
+      to { transform: scale(1.1) rotate(5deg); } 
+    }
+
+    .rank-tag { 
+      font-size: 11px; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-weight: bold; 
+      text-transform: uppercase; 
+      margin-top: 6px; 
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .festive-input {
+      background: #4a0808;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: white;
+      padding: 8px;
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 4px;
+      outline: none;
+    }
+    .festive-input:focus { border-color: #facc15; }
+
+    #auth-overlay { 
+      position: fixed; 
+      inset:0; 
+      background: radial-gradient(circle, rgba(94,11,11,0.95) 0%, rgba(30,5,5,0.98) 100%); 
+      z-index: 9999; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    }
+    
+    .auth-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 380px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 4px solid #facc15;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    /* small tooltip style */
+    .hint {
+      color: #ffd88a;
+      font-size: 12px;
+    }
+        .cell.ghost {
+    background: radial-gradient(circle, rgba(0,255,200,0.35), transparent 60%);
+    box-shadow: 0 0 14px rgba(0,255,200,0.75);
+    animation: ghostPulse 1.2s infinite;
+    }
+
+    @keyframes ghostPulse {
+    0% { opacity: .4; }
+    50% { opacity: .85; }
+    100% { opacity: .4; }
+    }
+        /* Chat AI UI */
+    #ai-toggle-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 99999;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      background: linear-gradient(135deg,#facc15,#ff7ab6);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+      cursor:pointer;
+      border: 3px solid rgba(0,0,0,0.12);
+    }
+    #ai-toggle-btn:hover { transform: scale(1.03) }
+
+    #ai-chat-window {
+      position: fixed;
+      right: 18px;
+      bottom: 86px;
+      width: 360px;
+      max-height: 64vh;
+      display: none;
+      flex-direction: column;
+      z-index: 99999;
+      background: linear-gradient(180deg, rgba(5,5,5,0.95), rgba(18,8,8,0.98));
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      overflow: hidden;
+      border: 2px solid rgba(250,204,21,0.12);
+    }
+
+    #ai-chat-header {
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    #ai-chat-messages {
+      padding: 12px;
+      overflow-y: auto;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .chat-bubble {
+      max-width: 84%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height:1.3;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+      white-space: pre-wrap;
+    }
+    .ai-bubble { background: rgba(250,204,21,0.14); color: #fff; align-self:flex-start; border:1px solid rgba(250,204,21,0.18) }
+    .user-bubble { background: rgba(255,255,255,0.06); color: #fff; align-self:flex-end; border:1px solid rgba(255,255,255,0.04) }
+    .typing { opacity: .85; font-style: italic }
+
+    #ai-chat-input-row { padding: 8px; display:flex; gap:8px; align-items:center; border-top:1px solid rgba(255,255,255,0.02) }
+    #ai-prompt { flex:1; padding:10px 12px; border-radius: 10px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.03); color:#fff; outline:none }
+    #ai-send-btn { padding:8px 12px; border-radius:10px; background:#facc15; color:#5b120f; font-weight:bold; cursor:pointer; border:none }
+
+    /* RESULT OVERLAY */
+    #result-overlay { position: fixed; inset:0; display:none; z-index:100000; align-items:center; justify-content:center; background: rgba(0,0,0,0.6); }
+    .result-card { background: linear-gradient(180deg,#fff,#fff); color:#111; border-radius:12px; padding:18px; width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); text-align:center; border:4px solid #facc15; }
+    .result-card h2 { margin:0 0 8px 0; font-size:20px; color:#5b120f; font-weight:800; }
+    .result-message { font-size:14px; color:#333; margin-top:6px; white-space:pre-wrap; }
+    .result-amount { font-weight:900; font-size:18px; margin-top:12px; }
+    .result-actions { display:flex; gap:10px; justify-content:center; margin-top:14px; }
+    .btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:none; font-weight:700; }
+    .btn-primary { background:#facc15; color:#5b120f; }
+    .btn-ghost { background:transparent; border:2px solid rgba(0,0,0,0.06); color:#5b120f; }
+
+    @media (max-width: 640px) {
+      #ai-chat-window { right: 12px; left: 12px; width: auto; bottom: 74px; max-height: 55vh; }
+      #ai-toggle-btn { right: 12px; bottom: 12px }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-card text-slate-900">
+    <div class="text-center mb-6">
+      <span class="text-4xl">🏮</span>
+      <h1 class="text-2xl font-black text-red-700 mt-2">Lễ Hội Xáo Trộn 2026</h1>
+      <p class="text-sm text-slate-500 font-medium">Đấu Trường Caro Xếp Hạng</p>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form">
+      <div class="space-y-4">
+        <input id="login-identity" type="text" placeholder="Email / Username / SĐT"
+          class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-red-500 rounded-xl outline-none transition-all">
+        <input id="login-password" type="password" placeholder="Mật khẩu"
+          class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-red-500 rounded-xl outline-none transition-all">
+        <button onclick="login()"
+          class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transform active:scale-95 transition-all">
+          VÀO LỄ HỘI
+        </button>
+      </div>
+      <p class="text-sm text-center mt-6">
+        Chưa có thiệp mời? 
+        <span onclick="showRegister()" class="text-red-600 font-bold cursor-pointer hover:underline">Đăng ký ngay</span>
+      </p>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-form" class="hidden">
+      <div class="space-y-3">
+        <input id="reg-email" type="email" placeholder="Email" class="w-full p-3 bg-slate-100 border-2 border-transparent focus:border-green-500 rounded-xl outline-none">
+        <input id="reg-username" type="text" placeholder="Tên hào kiệt" class="w-full p-3 bg-slate-100 border-2 border-transparent focus:border-green-500 rounded-xl outline-none">
+        <input id="reg-password" type="password" placeholder="Mật khẩu" class="w-full p-3 bg-slate-100 border-2 border-transparent focus:border-green-500 rounded-xl outline-none">
+        <input id="reg-password2" type="password" placeholder="Xác nhận mật khẩu" class="w-full p-3 bg-slate-100 border-2 border-transparent focus:border-green-500 rounded-xl outline-none">
+        <button onclick="register()" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition-all">
+          GHI DANH
+        </button>
+      </div>
+      <p class="text-sm text-center mt-6">
+        Đã là hào kiệt? 
+        <span onclick="showLogin()" class="text-green-600 font-bold cursor-pointer hover:underline">Đăng nhập</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result-overlay" aria-hidden="true">
+  <div class="result-card" role="dialog" aria-label="Kết quả trận đấu">
+    <h2 id="result-title">Kết quả</h2>
+    <div id="result-message" class="result-message"></div>
+    <div id="result-amount" class="result-amount"></div>
+    <div class="result-actions">
+      <button id="result-btn-primary" class="btn btn-primary">Ván mới</button>
+      <button id="result-btn-secondary" class="btn btn-ghost">Chơi lại</button>
+    </div>
+  </div>
+</div>
+
+<div class="game-container">
+  <!-- LEFT -->
+  <aside class="panel">
+    <div class="text-center mb-6">
+      <div class="text-5xl animate-bounce">🏮</div>
+      <h2 id="ui-user" class="text-2xl font-black mt-2 text-yellow-400">Đang tải...</h2>
+      <div id="ui-rank-badge" class="rank-tag bg-slate-500 text-white">Khách</div>
+      
+      <div class="mt-6 bg-black/30 p-4 rounded-2xl border border-yellow-500/30">
+        <div class="text-xs text-yellow-500/70 font-bold uppercase tracking-wider">Điểm Công Lực</div>
+        <div id="ui-score" class="text-4xl font-black text-white drop-shadow-md">0</div>
+        <div class="text-xs text-slate-400 mt-1 italic">Kỷ lục: <span id="ui-high">0</span></div>
+      </div>
+    </div>
+
+    <div class="space-y-5 flex-1">
+      <h3 class="font-bold text-yellow-500 border-b border-yellow-500/20 pb-2 text-sm tracking-widest">CẤU HÌNH TRẬN ĐẤU</h3>
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold uppercase">Kích thước (N):</label>
+        <input id="sizeN" type="number" value="12" min="3" max="20" class="festive-input">
+      </div>
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold uppercase">Luật thắng (M):</label>
+        <input id="winM" type="number" value="5" min="3" max="20" class="festive-input">
+      </div>
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold uppercase">Chế độ:</label>
+        <select id="mode" class="festive-input">
+          <option value="pve">Đấu Máy (Xếp hạng)</option>
+          <option value="pvp">Đối Kháng (Giải trí)</option>
+        </select>
+      </div>
+
+      <div class="mt-3">
+        <label class="text-[10px] text-slate-400 font-bold uppercase">Độ khó AI:</label>
+        <select id="ai-level" class="festive-input">
+          <option value="easy">Dễ</option>
+          <option value="normal" selected>Thường</option>
+          <option value="hard">Khó</option>
+          <option value="hard+">Hard+</option>
+        </select>
+        <div id="ai-note" class="text-xs hint mt-2">Lựa chọn độ khó sẽ bị giới hạn theo rank (Huyền Thoại mở Hard; Hard+ cho Thách Đấu top50).</div>
+      </div>
+
+      <button onclick="newGame()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-red-900 py-4 rounded-2xl font-black shadow-[0_0_15px_rgba(250,204,21,0.4)] transition-all transform active:scale-95">
+        KHAI CUỘC
+      </button>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <main class="panel board-wrapper">
+    <div class="festive-title">🏮 Cờ Caro Lễ Hội 🏮</div>
+    <div class="flex justify-between w-full max-w-[450px] mb-4 bg-black/20 p-3 rounded-xl border border-white/10">
+      <div id="turn-status" class="font-black text-yellow-400 tracking-wider">Lượt: X</div>
+      <div id="timer" class="font-mono text-white bg-red-900/50 px-3 py-1 rounded-lg border border-red-500/30">⏱️ 00:00</div>
+    </div>
+    <div id="caro-board"></div>
+  </main>
+
+  <!-- RIGHT -->
+  <aside class="panel">
+    <h3 class="text-xl font-black text-center mb-4 text-yellow-400 border-b-2 border-yellow-500/20 pb-2 italic">
+       BẢNG VÀNG HÀO KIỆT
+    </h3>
+    <div id="leaderboard" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
+    <button onclick="window.logout()" class="mt-6 py-2 px-4 rounded-lg bg-black/20 text-xs text-red-300 hover:bg-red-900/50 hover:text-white transition-all self-center border border-red-500/20">
+       Rời Lễ Hội (Đăng xuất)
+    </button>
+  </aside>
+</div>
+
+  <!-- CHAT TOGGLE BUTTON -->
+  <div id="ai-toggle-btn" title="Trợ lý AI (mở/đóng)" onclick="toggleAIChat()">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));">
+      <path d="M12 3C7.03 3 3 6.58 3 11C3 13.06 4.05 15 5.67 16.35L5 21L9.12 19.3C10.08 19.64 11.02 19.85 12 19.85C16.97 19.85 21 16.27 21 11.85C21 7.43 16.97 3 12 3Z" fill="#6b210b"/>
+      <circle cx="9" cy="11" r="1.2" fill="#fff"/>
+      <circle cx="12" cy="11" r="1.2" fill="#fff"/>
+      <circle cx="15" cy="11" r="1.2" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- CHAT WINDOW -->
+  <div id="ai-chat-window" inert style="display:none" role="dialog" aria-label="Trợ lý AI">
+    <div id="ai-chat-header">
+      <div style="flex:1">
+        <div style="font-weight:800; color:#fff">Trợ lý AI</div>
+        <div style="font-size:12px; color:rgba(255,255,255,0.6)">Hỗ trợ mẹo, gợi ý nước đi, hoặc hỏi về tính năng</div>
+      </div>
+      <button onclick="toggleAIChat()" style="background:transparent;border:none;color:#fff;font-weight:700;cursor:pointer">×</button>
+    </div>
+
+    <div id="ai-chat-messages" aria-live="polite"></div>
+
+    <div id="ai-chat-input-row">
+      <input id="ai-prompt" placeholder="Gõ câu hỏi hoặc 'gợi ý nước đi'... (Enter để gửi)" />
+      <button id="ai-send-btn">Gửi</button>
+    </div>
+  </div>
+
+<script type="module">
+import { auth, registerUser, smartLogin, logoutUser, onAuthReady, updateUserScore, listenLeaderboard } from './firebase.mjs';
+
+let N = 12, M = 5, board = [], current = 'X', over = false, mode = 'pve';
+let timerSec = 0, timerInt = null;
+let userData = { uid: null, score: 0 };
+let lock = false;
+let ghostCell = null;
+
+function clearGhostMove() {
+  if (ghostCell) {
+    ghostCell.classList.remove("ghost");
+    ghostCell = null;
+  }
+}
+
+function showGhostMove(r, c) {
+  clearGhostMove();
+  const el = document.getElementById(`c-${r}-${c}`);
+  if (el && !el.innerText) {
+    el.classList.add("ghost");
+    ghostCell = el;
+  }
+}
+
+const RANKS = [
+    { name: "Đồng 3", min: 0, color: "#b45309" }, { name: "Đồng 2", min: 50, color: "#b45309" }, { name: "Đồng 1", min: 100, color: "#b45309" },
+    { name: "Bạc 3", min: 150, color: "#94a3b8" }, { name: "Bạc 2", min: 200, color: "#94a3b8" }, { name: "Bạc 1", min: 250, color: "#94a3b8" },
+    { name: "Vàng 4", min: 300, color: "#facc15" }, { name: "Vàng 3", min: 350, color: "#facc15" }, { name: "Vàng 2", min: 400, color: "#facc15" }, { name: "Vàng 1", min: 450, color: "#facc15" },
+    { name: "Bạch Kim 4", min: 500, color: "#2dd4bf" }, { name: "Bạch Kim 1", min: 650, color: "#2dd4bf" },
+    { name: "Kim Cương 5", min: 700, color: "#60a5fa" }, { name: "Kim Cương 1", min: 900, color: "#60a5fa" },
+    { name: "Huyền Thoại", min: 1000, color: "#c084fc" },
+    { name: "Siêu Huyền Thoại", min: 1500, color: "#f472b6" },
+    { name: "Cao Thủ", min: 2000, color: "#f87171" },
+    { name: "Siêu Cao Thủ", min: 2500, color: "#ef4444" },
+    { name: "Thách Đấu", min: 3500, color: "#22d3ee" }
+];
+
+const getRank = (score) => {
+    let r = RANKS[0];
+    for (let i = 0; i < RANKS.length; i++) {
+        if (score >= RANKS[i].min) r = RANKS[i];
+    }
+    return r;
+};
+
+// AI reward rules (including hard+)
+const AI_REWARD = {
+    easy:   { win: 8,  lose: 5 },
+    normal: { win: 18, lose: 12 },
+    hard:   { win: 35, lose: 25 },
+    "hard+":{ win: 55, lose: 40 }
+};
+
+let aiLevel = 'normal';
+let lastLeaderboard = []; // store last snapshot users array
+let userLeaderboardIndex = -1; // index in leaderboard (0-based) or -1 if not found
+
+// helpers
+window.showRegister = () => {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
+};
+window.showLogin = () => {
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+};
+
+window.login = async () => {
+  try {
+    const identity = document.getElementById("login-identity").value.trim();
+    const password = document.getElementById("login-password").value;
+    if (!identity || !password) { alert("Hãy nhập danh tính!"); return; }
+    await smartLogin(identity, password);
+  } catch (err) {
+    alert("Không thể vào lễ hội: " + (err.message || err));
+  }
+};
+
+window.register = async () => {
+    try {
+        const email = document.getElementById('reg-email').value.trim();
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const password2 = document.getElementById('reg-password2').value;
+
+        if (!email || !username || !password || !password2) { alert("Vui lòng ghi danh đầy đủ!"); return; }
+        if (password !== password2) { alert("Mật khẩu không khớp!"); return; }
+
+        await registerUser(email, password, username);
+        alert("Ghi danh thành công! Hãy đăng nhập để tham gia.");
+        showLogin();
+    } catch (err) {
+        alert("Lỗi ghi danh: " + (err.message || err));
+    }
+};
+
+window.logout = () => logoutUser();
+
+// listen auth state
+onAuthReady((payload) => {
+    if (payload) {
+        userData.uid = payload.auth.uid;
+        userData.score = payload.data?.score || 0;
+        document.getElementById('auth-overlay').style.display = 'none';
+        updateUI(payload.data || {});
+        syncLeaderboard(); // start leaderboard listen
+        updateAIDifficultyAccess();
+        // do not auto-start: user presses KHAI CUỘC
+    } else {
+        document.getElementById('auth-overlay').style.display = 'flex';
+    }
+});
+
+const updateUI = (data) => {
+    document.getElementById('ui-user').innerText = data.username || "Khách";
+    document.getElementById('ui-score').innerText = (data.score || 0).toLocaleString();
+    document.getElementById('ui-high').innerText = ((data.high || 0)).toLocaleString();
+    const rank = getRank(data.score || 0);
+    const badge = document.getElementById('ui-rank-badge');
+    badge.innerText = rank.name;
+    badge.style.backgroundColor = rank.color;
+    updateAIDifficultyAccess();
+};
+
+// syncLeaderboard now stores array and updates userLeaderboardIndex
+const syncLeaderboard = () => {
+    // reuse listenLeaderboard from firebase.mjs
+    listenLeaderboard((users) => {
+        lastLeaderboard = users || [];
+        // find user index
+        userLeaderboardIndex = -1;
+        for (let i = 0; i < lastLeaderboard.length; i++) {
+            if (lastLeaderboard[i].uid === userData.uid) {
+                userLeaderboardIndex = i;
+                break;
+            }
+        }
+
+        // render board
+        const list = document.getElementById('leaderboard');
+        list.innerHTML = users.map((u, i) => {
+            const r = getRank(u.score || 0);
+            let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+            return `
+            <div class="flex items-center justify-between p-3 bg-red-950/40 rounded-xl border-l-4" style="border-color:${r.color}">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-black text-yellow-500/50 w-6">${medal}</span>
+                    <div>
+                        <div class="text-sm font-bold ${u.uid === userData.uid ? 'text-yellow-400 underline' : 'text-white'}">${u.username}</div>
+                        <div class="text-[9px] font-black uppercase" style="color:${r.color}">${r.name}</div>
+                    </div>
+                </div>
+                <div class="text-right font-mono text-yellow-500 font-black">${u.score || 0}</div>
+            </div>`;
+        }).join('');
+
+        // after updating leaderboard we must refresh AI access
+        updateAIDifficultyAccess();
+    });
+};
+
+// Check if player can use hard+
+const canUseHardPlus = () => {
+    const rank = getRank(userData.score || 0);
+    // must be exactly Thách Đấu rank AND in top 50 (index 0..49)
+    const isThachDau = rank.name === 'Thách Đấu';
+    const inTop50 = userLeaderboardIndex !== -1 && userLeaderboardIndex < 50;
+    return isThachDau && inTop50;
+};
+
+// Check if player can use hard
+const canUseHard = () => {
+    const rank = getRank(userData.score || 0);
+    // Huyền Thoại or higher -> hard allowed
+    const idxRank = RANKS.findIndex(r => r.name === rank.name);
+    const idxHuyenThoai = RANKS.findIndex(r => r.name === 'Huyền Thoại');
+    return idxRank >= idxHuyenThoai;
+};
+
+// NEW GAME
+window.newGame = () => {
+    const sizeN = document.getElementById('sizeN');
+    const winM  = document.getElementById('winM');
+    const modeEl = document.getElementById('mode');
+    const aiSelect = document.getElementById('ai-level');
+
+    // lấy giá trị chọn từ UI
+    let inputN = parseInt(sizeN.value) || 12;
+    let inputM = parseInt(winM.value) || 5;
+    let selectedAI = aiSelect?.value || 'normal';
+
+    // validate cơ bản
+    if (inputM < 3) {
+        inputM = 3;
+        winM.value = 3;
+    }
+    if (inputM === 3) {
+        inputN = 3;
+        sizeN.value = 3;
+        sizeN.disabled = true;
+    } else {
+        sizeN.disabled = false;
+    }
+    if (inputN < 3) { inputN = 3; sizeN.value = 3; }
+    if (inputN > 20) { inputN = 20; sizeN.value = 20; }
+    if (inputM > inputN) { inputM = inputN; winM.value = inputN; }
+
+    // gán
+    N = inputN;
+    M = inputM;
+    mode = modeEl.value;
+
+    // nếu pve: enforce access rules
+    if (mode === 'pve') {
+        if (selectedAI === 'hard' && !canUseHard()) {
+            alert('🔒 Chỉ từ Huyền Thoại (≥1000 điểm) mới được chọn HARD. Tự hạ xuống NORMAL.');
+            selectedAI = 'normal';
+            aiSelect.value = 'normal';
+        }
+        if (selectedAI === 'hard+' && !canUseHardPlus()) {
+            alert('🔒 Hard+ chỉ dành cho rank Thách Đấu và phải nằm trong TOP 50.');
+            selectedAI = 'hard'; // fallback nếu có quyền hard
+            if (!canUseHard()) { selectedAI = 'normal'; }
+            aiSelect.value = selectedAI;
+        }
+    } else {
+        // pvp: force normal
+        selectedAI = 'normal';
+        if (aiSelect) aiSelect.value = 'normal';
+    }
+
+    aiLevel = selectedAI;
+
+    board = Array(N).fill(null).map(() => Array(N).fill(null));
+    current = 'X';
+    over = false;
+    lock = false;
+
+    const boardEl = document.getElementById('caro-board');
+    boardEl.style.gridTemplateColumns = `repeat(${N}, 35px)`;
+    boardEl.innerHTML = '';
+
+    for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.id = `c-${r}-${c}`;
+            cell.onclick = () => handleCellClick(r, c, cell);
+            boardEl.appendChild(cell);
+        }
+    }
+
+    startTimer();
+    updateTurnUI();
+};
+
+// update the ai-level select enabled/disabled & tooltip
+function updateAIDifficultyAccess() {
+    const select = document.getElementById('ai-level');
+    const note = document.getElementById('ai-note');
+    if (!select || !note) return;
+
+    const allowHard = canUseHard();
+    const allowHardPlus = canUseHardPlus();
+
+    // enable/disable hard
+    [...select.options].forEach(opt => {
+        if (opt.value === 'hard') opt.disabled = !allowHard;
+        if (opt.value === 'hard+') opt.disabled = !allowHardPlus;
+    });
+
+    // adjust current value if not allowed
+    if (select.value === 'hard' && !allowHard) select.value = 'normal';
+    if (select.value === 'hard+' && !allowHardPlus) {
+        // fallback: prefer hard if allowed, otherwise normal
+        select.value = allowHard ? 'hard' : 'normal';
+    }
+
+    // tooltip messaging
+    if (!allowHard) {
+        note.innerText = 'Cần 1000 điểm (Huyền Thoại) để mở CHẾ ĐỘ HARD.';
+    } else if (!allowHardPlus) {
+        // show reason: either not Thách Đấu or not top50
+        const rank = getRank(userData.score || 0);
+        if (rank.name !== 'Thách Đấu') {
+            note.innerText = 'Hard+ chỉ dành cho rank "Thách Đấu" (hiện tại: ' + rank.name + ').';
+        } else if (!(userLeaderboardIndex !== -1 && userLeaderboardIndex < 50)) {
+            note.innerText = 'Bạn là Thách Đấu nhưng chưa vào TOP 50 — Hard+ chỉ mở cho Thách Đấu top50.';
+        } else {
+            note.innerText = 'Hard+ bị khóa.';
+        }
+    } else {
+        note.innerText = 'Bạn có thể chọn Hard hoặc Hard+ — chúc may mắn!';
+    }
+}
+
+// live check when user tries to change select
+const aiSelectEl = document.getElementById('ai-level');
+if (aiSelectEl) {
+    aiSelectEl.addEventListener('change', () => {
+        const desired = aiSelectEl.value;
+        if (desired === 'hard+' && !canUseHardPlus()) {
+            alert('🔒 Hard+ chỉ dành cho Thách Đấu top50.');
+            updateAIDifficultyAccess();
+        } else if (desired === 'hard' && !canUseHard()) {
+            alert('🔒 Cần Huyền Thoại (1000 điểm) để chọn Hard.');
+            updateAIDifficultyAccess();
+        }
+    });
+}
+
+// helper: kiểm tra bàn đầy
+const isBoardFull = () => {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!board[r][c]) return false;
+    return true;
+};
+
+const handleCellClick = (r, c, el) => {
+    if (lock) return;
+    if (over || board[r][c]) return;
+
+    if (mode === 'pvp') {
+        makeMove(r, c, current);
+        return;
+    }
+
+    // PVE
+    makeMove(r, c, 'X');
+
+    if (!over) {
+        lock = true;
+        // thinking time varies by difficulty to feel human
+        const base = (aiLevel === 'easy') ? 200 : (aiLevel === 'normal') ? 350 : (aiLevel === 'hard') ? 500 : 650;
+        setTimeout(() => {
+            aiMove();
+            lock = false;
+        }, base + Math.random()*300);
+    }
+};
+
+const makeMove = (r, c, p) => {
+    board[r][c] = p;
+    const el = document.getElementById(`c-${r}-${c}`);
+    if (!el) return;
+    el.innerText = p;
+    el.classList.add(p.toLowerCase());
+    
+    const winLine = checkWin(r, c, p);
+    if (winLine) {
+        handleWin(p, winLine);
+    } else {
+        // nếu không win, kiểm tra hòa
+        if (isBoardFull()) {
+            handleDraw();
+            return;
+        }
+        current = current === 'X' ? 'O' : 'X';
+        updateTurnUI();
+    }
+};
+
+const checkWin = (r, c, p) => {
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    for (let [dr, dc] of dirs) {
+        let line = [[r,c]];
+        for(let i=1; i<M; i++) {
+            let nr=r+dr*i, nc=c+dc*i;
+            if(board[nr]?.[nc] === p) line.push([nr,nc]); else break;
+        }
+        for(let i=1; i<M; i++) {
+            let nr=r-dr*i, nc=c-dc*i;
+            if(board[nr]?.[nc] === p) line.push([nr,nc]); else break;
+        }
+        if (line.length >= M) return line;
+    }
+    return null;
+};
+
+/* ============================
+   RESULT OVERLAY FUNCTIONS
+   ============================ */
+function showResultOverlay(title, message, amount = 0, primaryLabel = "Ván mới", primaryAction = null, secondaryLabel = "Chơi lại", secondaryAction = null) {
+    const overlay = document.getElementById('result-overlay');
+    document.getElementById('result-title').innerText = title;
+    document.getElementById('result-message').innerText = message;
+    const amtEl = document.getElementById('result-amount');
+    if (typeof amount === 'number' && amount !== 0) {
+        amtEl.innerText = (amount > 0 ? `+${amount} điểm` : `${amount} điểm`);
+        amtEl.style.color = amount > 0 ? '#0f5132' : '#7f1d1d';
+    } else {
+        amtEl.innerText = '';
+    }
+    const primaryBtn = document.getElementById('result-btn-primary');
+    const secondaryBtn = document.getElementById('result-btn-secondary');
+
+    primaryBtn.innerText = primaryLabel;
+    secondaryBtn.innerText = secondaryLabel;
+
+    // remove old listeners
+    primaryBtn.onclick = null;
+    secondaryBtn.onclick = null;
+
+    primaryBtn.onclick = () => {
+        hideResultOverlay();
+        if (typeof primaryAction === 'function') primaryAction();
+    };
+    secondaryBtn.onclick = () => {
+        hideResultOverlay();
+        if (typeof secondaryAction === 'function') secondaryAction();
+    };
+
+    overlay.style.display = 'flex';
+    overlay.removeAttribute('inert');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    setTimeout(() => {
+        document.getElementById('result-btn-primary')?.focus();
+    }, 50);
+}
+function hideResultOverlay() {
+    const overlay = document.getElementById('result-overlay');
+
+    // BỎ FOCUS NẾU ĐANG Ở TRONG OVERLAY
+    if (overlay.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+
+    overlay.style.display = 'none';
+    overlay.setAttribute('inert', '');
+    overlay.setAttribute('aria-hidden', 'true');
+}
+
+/* Actions used in overlay */
+function actionPlayAgain() {
+    // reset board, keep score and settings
+    board = Array(N).fill(null).map(() => Array(N).fill(null));
+    current = 'X';
+    over = false;
+    lock = false;
+    const boardEl = document.getElementById('caro-board');
+    boardEl.innerHTML = '';
+    boardEl.style.gridTemplateColumns = `repeat(${N}, 35px)`;
+    for (let r=0;r<N;r++){
+        for (let c=0;c<N;c++){
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.id = `c-${r}-${c}`;
+            cell.onclick = () => handleCellClick(r,c,cell);
+            boardEl.appendChild(cell);
+        }
+    }
+    startTimer();
+    updateTurnUI();
+}
+function actionNewGameSameSettings() {
+    // same as actionPlayAgain but keep current UI and re-evaluate AI access
+    actionPlayAgain();
+    updateAIDifficultyAccess();
+}
+function actionExitToMenu() {
+    // simple behavior: reload page to show auth overlay or reset
+    location.reload();
+}
+/* ============================
+   TURN UI + TIMER (FIXED)
+   ============================ */
+
+function updateTurnUI() {
+    const el = document.getElementById('turn-status');
+    if (!el) return;
+    el.innerText = `Lượt: ${current}`;
+}
+
+// expose ra global cho inline / console
+window.updateTurnUI = updateTurnUI;
+
+window.startTimer = function () {
+    clearInterval(timerInt);
+    timerSec = 0;
+    timerInt = setInterval(() => {
+        timerSec++;
+        const m = Math.floor(timerSec / 60).toString().padStart(2, '0');
+        const s = (timerSec % 60).toString().padStart(2, '0');
+        const t = document.getElementById('timer');
+        if (t) t.innerText = `⏱️ ${m}:${s}`;
+    }, 1000);
+};
+
+
+/* ============================
+   HANDLERS FOR WIN / DRAW (USE OVERLAY)
+   ============================ */
+const handleDraw = () => {
+    over = true;
+    lock = true;
+    clearInterval(timerInt);
+
+    showResultOverlay(
+        '⚖️ HÒA',
+        'Trận đấu kết thúc HÒA.\nKhông có cộng/trừ điểm.',
+        0,
+        'Chơi lại',
+        actionPlayAgain,
+        'Thoát',
+        actionExitToMenu
+    );
+};
+
+const handleWin = async (winner, line) => {
+    over = true;
+    clearInterval(timerInt);
+    line.forEach(([r, c]) => {
+        const el = document.getElementById(`c-${r}-${c}`);
+        if (el) el.classList.add('win');
+    });
+
+    if (mode === 'pve') {
+        const rule = AI_REWARD[aiLevel] || AI_REWARD.normal;
+        if (winner === 'X') {
+            // player wins
+            const delta = rule.win;
+            userData.score = (userData.score || 0) + delta;
+            try {
+                await updateUserScore(userData.uid, userData.score);
+            } catch (e) { console.error(e); }
+            updateUI({
+            username: document.getElementById('ui-user').innerText,
+            score: userData.score,
+            high: Math.max(
+                Number(document.getElementById('ui-high').innerText) || 0,
+                userData.score
+            )
+            });
+
+            // show overlay: win => option chơi tiếp (next round) or ván mới
+
+            // 1️⃣ HIỆN KẾT QUẢ NGAY
+            showResultOverlay(
+                '🎉 Bạn thắng!',
+                `Bạn đã hạ gục AI (${aiLevel.toUpperCase()})\n+${delta} điểm`,
+                delta,
+                'Chơi tiếp',
+                actionPlayAgain,
+                'Ván mới',
+                actionNewGameSameSettings
+            );
+
+            // 2️⃣ CẬP NHẬT UI NGAY (local)
+            updateUI({
+                username: document.getElementById('ui-user').innerText,
+                score: userData.score,
+                high: Math.max(
+                    Number(document.getElementById('ui-high').innerText) || 0,
+                    userData.score
+                )
+            });
+
+            // 3️⃣ GỬI FIREBASE Ở NỀN (KHÔNG await)
+            updateUserScore(userData.uid, userData.score)
+                .catch(err => console.error(err));
+
+
+            } else {
+                // player lost
+                const delta = -rule.lose;
+                userData.score = Math.max(0, (userData.score || 0) + delta);
+
+                // 1️⃣ HIỆN KẾT QUẢ NGAY
+                showResultOverlay(
+                    '💀 Bạn thua!',
+                    `AI (${aiLevel.toUpperCase()}) đã đánh bại bạn\n${delta} điểm`,
+                    delta,
+                    'Chơi tiếp',
+                    actionPlayAgain,
+                    'Ván mới',
+                    actionNewGameSameSettings
+                );
+
+                // 2️⃣ CẬP NHẬT UI LOCAL NGAY
+                updateUI({
+                    username: document.getElementById('ui-user').innerText,
+                    score: userData.score,
+                    high: Math.max(
+                        Number(document.getElementById('ui-high').innerText) || 0,
+                        userData.score
+                    )
+                });
+
+                // 3️⃣ GỬI FIREBASE Ở NỀN (KHÔNG await)
+                updateUserScore(userData.uid, userData.score)
+                    .catch(err => console.error(err));
+            }
+            } else {
+                // pvp local (KHÔNG ĐỤNG SCORE / FIREBASE)
+                showResultOverlay(
+                    '🏆 Kết quả',
+                    `Người chơi ${winner} chiến thắng!`,
+                    0,
+                    'Ván mới',
+                    actionNewGameSameSettings,
+                    'Thoát',
+                    actionExitToMenu
+                );
+            }
+};
+
+/* ============================
+   AI MOVE LOGIC (unchanged)
+   ============================ */
+const aiMove = () => {
+    let bestScore = -Infinity;
+    let bestMoves = [];
+
+    for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+            if (board[r][c]) continue;
+            let score = 0;
+
+            if (aiLevel === 'hard+' ) {
+                score += evaluate(r, c, 'O') * 1.6;
+                score += evaluate(r, c, 'X') * 1.8;
+                const center = Math.floor(N/2);
+                score += Math.max(0, 8 - (Math.abs(center - r) + Math.abs(center - c)));
+                board[r][c] = 'O';
+                let oppBest = 0;
+                outer:
+                for (let rr=0; rr<N; rr++) {
+                    for (let cc=0; cc<N; cc++) {
+                        if (board[rr][cc]) continue;
+                        const val = evaluate(rr, cc, 'X');
+                        if (val > oppBest) oppBest = val;
+                        if (oppBest >= 10000) break outer;
+                    }
+                }
+                board[r][c] = null;
+                score -= oppBest * 0.9;
+                board[r][c] = 'O';
+                let immediateWin = !!checkWin(r, c, 'O');
+                board[r][c] = null;
+                if (immediateWin) score += 50000;
+                score *= (0.95 + Math.random()*0.1);
+
+            } else if (aiLevel === 'hard') {
+                score += evaluate(r, c, 'O') * 1.4;
+                score += evaluate(r, c, 'X') * 1.6;
+                const center = Math.floor(N/2);
+                score += Math.max(0, 6 - (Math.abs(center - r) + Math.abs(center - c)));
+                score *= (0.96 + Math.random()*0.08);
+
+            } else if (aiLevel === 'normal') {
+                score += evaluate(r, c, 'O') + evaluate(r, c, 'X') * 1.2;
+                score *= (0.9 + Math.random()*0.2);
+
+            } else { // easy
+                score = Math.random() * 100;
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMoves = [{ r, c, score }];
+            } else if (Math.abs(score - bestScore) < 1e-6) {
+                bestMoves.push({ r, c, score });
+            } else {
+                if (score >= bestScore * 0.9) {
+                    bestMoves.push({ r, c, score });
+                }
+            }
+        }
+    }
+
+    if (bestMoves.length) {
+        let pick;
+        if (aiLevel === 'hard+' ) {
+            bestMoves.sort((a,b)=>b.score-a.score);
+            const choices = bestMoves.slice(0, Math.max(3, Math.ceil(bestMoves.length*0.15)));
+            pick = choices[Math.floor(Math.random()*choices.length)];
+        } else if (aiLevel === 'hard') {
+            bestMoves.sort((a,b)=>b.score-a.score);
+            const top = bestMoves.slice(0, Math.max(2, Math.ceil(bestMoves.length*0.12)));
+            pick = top[Math.floor(Math.random()*top.length)];
+        } else {
+            pick = bestMoves[Math.floor(Math.random()*bestMoves.length)];
+        }
+        makeMove(pick.r, pick.c, 'O');
+    } else {
+        for (let r = 0; r < N; r++) {
+            for (let c = 0; c < N; c++) {
+                if (!board[r][c]) { makeMove(r, c, 'O'); return; }
+            }
+        }
+    }
+};
+
+// evaluate function (same idea as before but safe on bounds)
+const evaluate = (r, c, p) => {
+    let score = 0;
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    dirs.forEach(([dr, dc]) => {
+        let count = 0, block = 0;
+        for(let i=1; i<M; i++) {
+            let nr=r+dr*i, nc=c+dc*i;
+            if (nr<0 || nc<0 || nr>=N || nc>=N) { block++; break; }
+            if(board[nr]?.[nc] === p) count++;
+            else { if(board[nr]?.[nc]) block++; break; }
+        }
+        for(let i=1; i<M; i++) {
+            let nr=r-dr*i, nc=c-dc*i;
+            if (nr<0 || nc<0 || nr>=N || nc>=N) { block++; break; }
+            if(board[nr]?.[nc] === p) count++;
+            else { if(board[nr]?.[nc]) block++; break; }
+        }
+        if(count >= M-1) score += 10000;
+        else if(count === M-2 && block === 0) score += 1000;
+        else score += Math.pow(10, count);
+    });
+    return score;
+};
+
+/* ===============================
+   Chat AI (client + public API)
+   - 'gợi ý' command returns local move suggestion
+   - otherwise calls a public model endpoint for demo
+   =============================== */
+
+function appendChatBubble(text, sender) {
+    const container = document.getElementById("ai-chat-messages");
+    const div = document.createElement("div");
+    div.className = `chat-bubble ${ sender === "ai" ? "ai-bubble" : "user-bubble" }`;
+    div.innerText = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+function toggleAIChat() {
+    const win = document.getElementById("ai-chat-window");
+    const input = document.getElementById("ai-prompt");
+    const isOpen = win.style.display === "flex";
+
+    if (isOpen) {
+        // BỎ FOCUS TRƯỚC KHI ẨN
+        if (win.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+        win.style.display = "none";
+        win.setAttribute("inert", "");
+        win.setAttribute("aria-hidden", "true");
+    } else {
+        win.style.display = "flex";
+        win.removeAttribute("inert");
+        win.setAttribute("aria-hidden", "false");
+        setTimeout(() => input?.focus(), 50);
+    }
+}
+
+let aiTypingBubble = null;
+function showAITyping() {
+    if (aiTypingBubble) return;
+    const container = document.getElementById("ai-chat-messages");
+    aiTypingBubble = document.createElement("div");
+    aiTypingBubble.className = "chat-bubble ai-bubble typing";
+    aiTypingBubble.innerText = "Đang trả lời...";
+    container.appendChild(aiTypingBubble);
+    container.scrollTop = container.scrollHeight;
+}
+
+function hideAITyping() {
+    if (aiTypingBubble) {
+        aiTypingBubble.remove();
+        aiTypingBubble = null;
+    }
+}
+
+// Helper: pretty coordinate (human-friendly 1-based)
+const coordStr = (r,c) => `Hàng ${r+1}, Cột ${c+1}`;
+
+// Suggest moves for player 'X' (human) using simple heuristic
+function suggestMovesForPlayerX(limit = 3) {
+    let moves = [];
+    for (let r=0;r<N;r++){
+        for (let c=0;c<N;c++){
+            if (board[r][c]) continue;
+            // score attack for X and defense against O
+            const atk = evaluate(r,c,'X');
+            const def = evaluate(r,c,'O');
+            // prefer moves that both attack and block
+            const score = atk*1.4 + def*1.0;
+            moves.push({r,c,score,atk,def});
+        }
+    }
+    moves.sort((a,b)=>b.score-a.score);
+    return moves.slice(0,limit);
+}
+
+/**
+ * ===============================
+ * AI CORE & SYSTEM PROMPT
+ * ===============================
+ */
+const apiKey = "AIzaSyCOPuIhzXa9Lra7UXbdkSeQso8aTVXvT1c";
+
+const systemPrompt = `
+Bạn là trợ lý AI thông minh của Google Gemini, tên là "Trợ lý Assistant",
+được tạo bởi Google và "Lù A Vangg" để hỗ trợ người chơi trong game
+🎮 CỜ CARO – Lễ Hội Xáo Trộn 2026 🎮
+
+==============================
+📌 THÔNG TIN TRÒ CHƠI
+==============================
+- Trò chơi: Cờ Caro (Gomoku mở rộng)
+- Bàn cờ kích thước N x N (3 → 20)
+- Luật thắng: nối đủ M quân liên tiếp (ngang, dọc hoặc chéo)
+- Chế độ:
+  + Đấu Máy (AI)
+  + Đối Kháng (2 người)
+
+==============================
+🤖 ĐỘ KHÓ AI
+==============================
+- Dễ
+- Thường
+- Khó (mở khi đạt rank Huyền Thoại ≥ 1000 điểm)
+- Hard+ (chỉ cho rank Thách Đấu và TOP 50)
+
+==============================
+🏆 ĐIỂM & XẾP HẠNG
+==============================
+- Thắng AI sẽ được cộng điểm (tùy độ khó)
+- Thua AI sẽ bị trừ điểm
+- Điểm dùng để lên rank:
+  Đồng → Bạc → Vàng → Bạch Kim → Kim Cương → Huyền Thoại → Thách Đấu
+
+==============================
+💬 NGƯỜI CHƠI CÓ THỂ HỎI
+==============================
+- Cách chơi Cờ Caro
+- Luật thắng / luật hòa
+- Giải thích các độ khó AI
+- Cách lên rank nhanh hơn
+- Mẹo chơi, chiến thuật, gợi ý nước đi
+- Hỏi về điểm số, xếp hạng
+- Hỏi về tài khoản
+
+⚠️ Khi người chơi hỏi "gợi ý" hoặc "nước đi":
+→ Hãy trả lời như một trợ lý chiến thuật, không tiết lộ thuật toán nội bộ.
+
+==============================
+🎨 PHONG CÁCH TRẢ LỜI
+==============================
+- Vui vẻ 😄, lịch sự, thân thiện
+- Trả lời ngắn gọn, dễ hiểu
+- Dùng emoji liên quan đến Tết 🏮🎉♟️
+- KHÔNG nói thô tục
+- Người chơi hỏi bằng ngôn ngữ nào → trả lời bằng ngôn ngữ đó
+
+==============================
+🔒 BẢO MẬT
+==============================
+- KHÔNG bao giờ hỏi mật khẩu
+- KHÔNG yêu cầu thông tin nhạy cảm
+- Nếu người chơi báo lỗi tài khoản → hướng dẫn dùng "Quên mật khẩu"
+  (tính năng đang phát triển, hãy nhắc người chơi kiên nhẫn)
+
+Bạn tồn tại để giúp người chơi chơi tốt hơn,
+hiểu game rõ hơn và có trải nghiệm vui vẻ trong Lễ Hội Xáo Trộn 2026 🎆
+`;
+
+/**
+ * ===============================
+ * AI CHAT LOGIC (NO SDK – FETCH)
+ * ===============================
+ */
+async function askAI() {
+    const input = document.getElementById("ai-prompt");
+    const raw = input.value.trim();
+    if (!raw) return;
+
+    const msg = raw.toLowerCase();
+
+    appendChatBubble(raw, "user");
+    input.value = "";
+
+    // ===============================
+    // 🎯 GỢI Ý NƯỚC ĐI THEO BÀN CỜ
+    // ===============================
+    if (
+        msg.includes("gợi ý") ||
+        msg.includes("nước đi") ||
+        msg.includes("hint")
+    ) {
+        if (over) {
+            appendChatBubble("⚠️ Ván cờ đã kết thúc rồi nhé!", "ai");
+            return;
+        }
+
+        let best = null;
+        let bestScore = -Infinity;
+
+        for (let r = 0; r < N; r++) {
+            for (let c = 0; c < N; c++) {
+                if (board[r][c]) continue;
+
+                // X = người chơi
+                const attack = evaluate(r, c, 'X');
+                const defense = evaluate(r, c, 'O');
+
+                const score = attack * 1.5 + defense * 1.2;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = { r, c, attack, defense };
+                }
+            }
+        }
+
+        if (!best) {
+            appendChatBubble("🤔 Không tìm được nước đi phù hợp.", "ai");
+            return;
+        }
+
+        // 👻 HIGHLIGHT Ô GỢI Ý
+        showGhostMove(best.r, best.c);
+
+        appendChatBubble(
+            `♟️ **Gợi ý nước đi tốt nhất**:\n` +
+            `👉 Hàng ${best.r + 1}, Cột ${best.c + 1}\n\n` +
+            `🔥 Tấn công: ${best.attack}\n` +
+            `🛡️ Phòng thủ: ${best.defense}\n\n` +
+            `👻 Ô gợi ý đã được highlight trên bàn cờ!`,
+            "ai"
+        );
+        return;
+    }
+
+    // ===============================
+    // 🤖 CHAT KIẾN THỨC → GEMINI
+    // ===============================
+    showAITyping();
+
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [
+                        { role: "user", parts: [{ text: raw }] }
+                    ],
+                    systemInstruction: {
+                        role: "system",
+                        parts: [{ text: systemPrompt }]
+                    }
+                })
+            }
+        );
+
+        const data = await res.json();
+        const text =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "🤖 AI đang suy nghĩ, thử lại nhé!";
+
+        hideAITyping();
+        appendChatBubble(text, "ai");
+    } catch (err) {
+        console.error(err);
+        hideAITyping();
+        appendChatBubble(
+            "⚠️ Không kết nối được AI. Kiểm tra mạng nhé!",
+            "ai"
+        );
+    }
+}
+// wire send button and Enter key
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiPrompt = document.getElementById('ai-prompt');
+if (aiSendBtn && aiPrompt) {
+    aiSendBtn.addEventListener('click', askAI);
+    aiPrompt.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            askAI();
+        }
+    });
+}
+
+// expose helpers globally
+window.askAI = askAI;
+window.toggleAIChat = toggleAIChat;
+
+// Expose helpers so HTML inline handlers and console can call them safely
+window.updateTurnUI = updateTurnUI;
+window.handleCellClick = handleCellClick;
+window.makeMove = makeMove;
+window.actionPlayAgain = actionPlayAgain;
+window.actionNewGameSameSettings = actionNewGameSameSettings;
+window.actionExitToMenu = actionExitToMenu;
+
+// Optional: disable KHAI CUỘC until auth ready (if you want)
+if (document.getElementById('auth-overlay')?.style.display !== 'none') {
+  const btn = document.querySelector('button[onclick="newGame()"]');
+  if (btn) { btn.disabled = false; /* or true to disable when not authed */ }
+}
+</script>
+<footer id="copyright"
+    style="
+        position: fixed;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #ffffff;
+        opacity: 0.8;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        user-select: none;
+        pointer-events: none;
+        z-index: 9999;
+        text-shadow: 0 0 3px rgba(0,0,0,0.6);
+    ">
+    © 2026 Luavang – All Rights Reserved
+</footer>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>🎮 Lễ Hội Game Tết 2026 – Menu (v5.3)</title>
+<style>
+/* CSS gọn, giữ giao diện đẹp */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  overflow:hidden;
+  font-family:Segoe UI,system-ui,Arial;
+  /* background will be set by JS to an image + overlay */
+  background: linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.55)), url('') center/cover no-repeat fixed;
+  color:#fff;
+  transition: background-image .8s ease, background-color .4s ease;
+}
+.banner{position:fixed;top:0;width:100%;height:70px;background:linear-gradient(90deg,#ff1744,#ff9800,#ffd600);display:flex;align-items:center;justify-content:center;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#aiText{font-weight:700;font-size:clamp(14px,2.5vw,20px);color:#4a1200}
+.cursor{width:2px;height:1em;background:#4a1200;margin-left:6px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:0}}
+.header{margin-top:90px;text-align:center}
+.header h1{font-size:clamp(1.8em,4vw,3em);color:#ffd966;text-shadow:0 0 20px red,0 0 40px gold}
+.countdown{margin-top:8px;color:#ffe082;font-weight:600}
+.menu{position:absolute;bottom:170px;width:100%;display:flex;justify-content:center;gap:20px;padding:0 10px}
+.game-card{width:240px;padding:22px;border-radius:22px;text-align:center;cursor:pointer;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(255,200,0,.45);transition:.25s}
+.game-card:hover{transform:translateY(-8px) scale(1.04)}
+.game-card span{font-size:56px}
+.game-card h2{color:#ffd54f;margin-top:8px}
+.top-btn{position:fixed;right:15px;top:80px;display:flex;flex-direction:column;gap:10px;z-index:9999}
+.top-btn button{width:46px;height:46px;border:none;border-radius:50%;background:gold;font-size:18px;cursor:pointer}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(45deg,#ffcc00,#ff1744);color:#400;padding:10px 18px;border-radius:20px;font-weight:600;box-shadow:0 0 20px gold;z-index:9999}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}
+.popup .box{background:#fff7e6;color:#600;padding:18px;border-radius:14px;max-width:520px;text-align:left}
+#vol{position:fixed;right:18px;top:150px;z-index:9999;width:6px;height:90px;background:gold;border-radius:10px}
+canvas{position:fixed;inset:0;pointer-events:none}
+@media(max-width:768px){.menu{flex-direction:column;bottom:220px}}
+.info-title{font-weight:700;color:#4a1200;margin-bottom:8px}
+.info-list{margin-left:16px}
+</style>
+</head>
+<body>
+
+<!-- BANNER AI -->
+<div class="banner" role="banner" aria-hidden="false">
+  <div id="aiText" aria-live="polite"></div><div class="cursor" aria-hidden="true"></div>
+</div>
+
+<!-- TOP BUTTONS -->
+<div class="top-btn" role="toolbar" aria-label="Controls">
+  <button onclick="toggleMusic()" title="Phát / Tắt nhạc" aria-label="Play music">🎵</button>
+  <button onclick="toggleTheme()" title="Chuyển theme" aria-label="Toggle theme">🌗</button>
+  <button onclick="full()" title="Toàn màn hình" aria-label="Fullscreen">⛶</button>
+  <button onclick="changeBg()" title="Đổi nền" aria-label="Change background">🖼️</button>
+  <button onclick="showInfo()" title="Thông tin & Điều khoản" aria-label="Info">ℹ️</button>
+</div>
+
+<!-- VOLUME SLIDER -->
+<input id="vol" type="range" min="0" max="100" aria-label="Âm lượng" />
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🎉 LỄ HỘI GAME TẾT 2026 🎉</h1>
+  <div class="countdown" id="countdown" aria-live="polite"></div>
+</div>
+
+<!-- MENU GAMES -->
+<div class="menu" role="navigation" aria-label="Chọn trò chơi">
+  <div class="game-card" onclick="goGame('le-hoi-xao-tron-2026/coc.html')">
+    <span>🥤</span>
+    <h2>3 CỐC BÓNG</h2>
+    <p>Trí nhớ & phản xạ</p>
+  </div>
+
+  <div class="game-card" onclick="goGame('le-hoi-caro-2026/caro.html')">
+    <span>♟️</span>
+    <h2>CỜ CARO</h2>
+    <p>Đấu trí chiến thuật</p>
+  </div>
+</div>
+
+<!-- INFO POPUP (Version 5.3 + Điều khoản) -->
+<div class="popup" id="infoPopup" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div id="infoTitle" class="info-title">📢 Thông tin & Điều khoản — Version 5.3</div>
+        <div style="font-size:13px;color:#333">Cập nhật: v5.3</div>
+      </div>
+      <button onclick="closeInfo()" style="background:#ffd54f;border:none;padding:6px 10px;border-radius:8px;cursor:pointer">Đóng</button>
+    </div>
+
+    <hr style="margin:8px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+    <div style="margin-top:8px">
+      <b>Điểm nổi bật (v5.3):</b>
+      <ul class="info-list">
+        <li>• Loại bỏ tính năng <b>Lì xì</b> — chuyển sang cơ chế điểm & leaderboard chính thức trong các bản tiếp theo.</li>
+        <li>• Sửa lỗi <b>Toàn màn hình</b> — hoạt động tốt trên hầu hết trình duyệt (kèm rung nhẹ trên thiết bị hỗ trợ).</li>
+        <li>• Tối ưu trải nghiệm mobile & desktop, giữ nguyên hiệu ứng hoa mai và pháo hoa nhẹ nhàng.</li>
+      </ul>
+    </div>
+
+    <div style="margin-top:10px">
+      <b>Thêm nhiều lời chúc:</b>
+      <ul class="info-list" id="moreWishes">
+        <!-- filled by JS -->
+      </ul>
+    </div>
+
+    <div style="margin-top:12px">
+      <b>Điều khoản & Chính sách ngắn gọn:</b>
+      <ol class="info-list">
+        <li><b>Hành vi:</b> Không sử dụng phần mềm gian lận, bot, hoặc can thiệp không hợp lệ. Vi phạm có thể dẫn tới bị khóa tài khoản (nếu áp dụng).</li>
+        <li><b>Quyền sở hữu:</b> Nội dung, hình ảnh và âm thanh trong trang thuộc quyền quản lý của bạn / dự án — sử dụng hợp pháp và tôn trọng bản quyền.</li>
+        <li><b>Quyền riêng tư:</b> Ứng dụng lưu một số dữ liệu cục bộ (localStorage) để giữ UID/người chơi. Không thu thập thông tin nhạy cảm.</li>
+        <li><b>Trách nhiệm:</b> Mục đích giải trí; nhà phát triển không chịu trách nhiệm về mất mát dữ liệu cá nhân do chỉnh sửa/truy cập trái phép.</li>
+        <li><b>Liên hệ admin:</b> Để quản trị — thêm node <code>admins/&lt;yourUid&gt;</code> trong Realtime DB hoặc liên hệ người phát triển dự án.</li>
+      </ol>
+    </div>
+
+    <div style="margin-top:12px;font-size:13px;color:#444">
+      <b>Gợi ý:</b> Muốn tích hợp leaderboard/ghi điểm/tắt tính năng nào khác — mình hỗ trợ tích hợp Firebase & rules an toàn.
+    </div>
+  </div>
+</div>
+
+<!-- EFFECT CANVAS -->
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<!-- SOUNDS -->
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
+<audio id="bgm" preload="auto" loop><source src="nhac-tet.mp3" type="audio/mpeg"></audio>
+
+<!-- SCRIPT -->
+<script>
+/* ================= USER & UID ================= */
+let uid = localStorage.uid;
+if(!uid){
+  uid = "u_" + Math.random().toString(36).slice(2,10);
+  localStorage.uid = uid;
+}
+let name = localStorage.playerName || prompt("🎊 Nhập tên của bạn:") || "Bạn";
+localStorage.playerName = name;
+
+/* ================= BACKGROUND IMAGES (random + change button) ================= */
+const bgImages = [
+  "assets/tet/anh1.jpg",
+  "assets/tet/anh2.jpg",
+  "assets/tet/anh3.jpg",
+  "assets/tet/anh4.jpg",
+  "assets/tet/anh5.jpg",
+  "assets/tet/anh6.jpg",
+];
+
+function setRandomBackground(){
+  const url = bgImages[Math.floor(Math.random()*bgImages.length)];
+  document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.55)), url("${url}")`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+}
+function changeBg(){
+  setRandomBackground();
+  toast("🖼️ Đã đổi giao diện nền");
+}
+setRandomBackground(); // initial
+
+/* ================= MUSIC / VOLUME ================= */
+const bgm = document.getElementById('bgm');
+const volEl = document.getElementById('vol');
+const clickSound = document.getElementById('clickSound');
+let musicOn = localStorage.music === 'on';
+bgm.volume = localStorage.vol ? +localStorage.vol : 0.7;
+volEl.value = Math.round(bgm.volume * 100);
+
+function startMusic(){
+  if (musicOn) bgm.play().catch(()=>{});
+  document.removeEventListener('click', startMusic);
+  document.removeEventListener('touchstart', startMusic);
+}
+document.addEventListener('click', startMusic);
+document.addEventListener('touchstart', startMusic);
+
+function toggleMusic(){
+  musicOn = !musicOn;
+  localStorage.music = musicOn ? 'on' : 'off';
+  musicOn ? bgm.play().catch(()=>{}) : bgm.pause();
+}
+volEl.addEventListener('input', ()=> {
+  bgm.volume = volEl.value / 100;
+  localStorage.vol = bgm.volume;
+});
+
+/* ================= THEME ================= */
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  if(document.body.classList.contains('light')){
+    document.body.style.backgroundBlendMode = 'normal';
+    document.body.style.background = 'linear-gradient(#fff7e6,#ffd180)';
+    document.body.style.color = '#600';
+  } else {
+    // restore image overlay (keeps last chosen image)
+    setRandomBackground(); // choose new image for clarity
+    document.body.style.color = '#fff';
+  }
+}
+
+/* ================= FULLSCREEN + VIBRATION (fix v5.3) ================= */
+function full(){
+  const el = document.documentElement;
+  const isFull = document.fullscreenElement || document.webkitFullscreenElement || false;
+  // Try to vibrate briefly when toggling (mobile)
+  try{ if(navigator.vibrate) navigator.vibrate(30); } catch(e){}
+  if(!isFull){
+    if(el.requestFullscreen) el.requestFullscreen();
+    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if(el.msRequestFullscreen) el.msRequestFullscreen();
+  } else {
+    if(document.exitFullscreen) document.exitFullscreen();
+    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+
+/* ================= NAVIGATE TO GAME ================= */
+function clickSoundPlay(){ if(clickSound){ clickSound.currentTime = 0; clickSound.play().catch(()=>{}); } }
+function goGame(url){
+  clickSoundPlay();
+  toast('🎮 Đang vào game...');
+  setTimeout(()=> location.href = url, 600);
+}
+
+/* ================= TOAST ================= */
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerText = msg;
+  document.body.appendChild(t);
+  setTimeout(()=> t.remove(), 2600);
+}
+
+/* ================= BANNER AI TYPEWRITER (mở rộng nhiều lời chúc) ================= */
+const wishes = [
+  `🎉 Chúc ${localStorage.playerName||'bạn'} năm mới an khang – phát tài 🧧`,
+  "🌸 Xuân sang vạn sự như ý, sức khoẻ dồi dào",
+  "🔥 Năm mới thắng lớn, lộc đến đầy nhà",
+  "🎮 Chơi game vui vẻ — không căng thẳng, thắng hay thua đều vui",
+  "💫 Tâm an, thân khỏe, học hành tiến bộ, công việc thuận lợi",
+  "🍊 Lì xì chúc phúc (đã chuyển sang cơ chế điểm trong phiên bản mới)",
+  "🌱 Hy vọng mới, cơ hội mới, may mắn luôn bên bạn",
+  "⭐ Chúc bạn đạt nhiều thành tích trong game & cuộc sống",
+  "🎆 Cầu mong một năm hòa thuận, bình an, tràn đầy tiếng cười",
+  "🧡 Yêu thương, sẻ chia và nhiều kỷ niệm đẹp bên gia đình"
+];
+let wi = 0, ci = 0, el = document.getElementById('aiText');
+(function type(){
+  if(ci < wishes[wi].length){
+    el.textContent += wishes[wi][ci++];
+    setTimeout(type, 40);
+  } else {
+    setTimeout(()=>{ el.textContent = ''; ci = 0; wi = (wi+1) % wishes.length; type(); }, 2200);
+  }
+})();
+
+/* ================= COUNTDOWN ================= */
+const cd = document.getElementById('countdown');
+setInterval(()=> {
+  const t = new Date("2026-02-17T00:00:00") - new Date();
+  if(t > 0){
+    const days = Math.floor(t / 86400000);
+    const hours = Math.floor((t % 86400000) / 3600000);
+    cd.innerText = `⏳ Còn ${days} ngày ${hours} giờ tới Tết`;
+  } else {
+    cd.innerText = "🎆 Chúc mừng năm mới!";
+  }
+}, 1000);
+
+/* ================= PARTICLES VISUAL ================= */
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+window.addEventListener('resize', resize);
+resize();
+setInterval(()=> {
+  particles.push({ x: Math.random()*canvas.width, y: canvas.height + 10, r: Math.random()*3+2, vx: (Math.random()-0.5)*1.5, vy: -2-Math.random()*2, life: 300 });
+}, 220);
+
+(function anim(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach((p, i) => {
+    ctx.fillStyle = "rgba(255,215,0,0.95)";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fill();
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.life--;
+  });
+  particles = particles.filter(p => p.life > 0 && p.y > -50);
+  requestAnimationFrame(anim);
+})();
+
+/* ================= INFO POPUP: thêm nhiều lời chúc vào danh sách ================= */
+function showInfo(){ 
+  const list = document.getElementById('moreWishes');
+  if(list && list.children.length === 0){
+    const extras = [
+      "An khang thịnh vượng, tiền vô như nước.",
+      "Gặp may mắn trong mọi quyết định, bình an trong mỗi ngày.",
+      "Gia đình ấm no, bạn bè thân mật, niềm vui dài lâu.",
+      "Học tập tiến bộ, thi cử thành công, thăng tiến công việc.",
+      "Tâm sáng, lòng hiền, mọi thứ hanh thông.",
+      "Chúc bạn có những trải nghiệm mới tuyệt vời trong năm tới."
+    ];
+    extras.forEach(t=>{
+      const li = document.createElement('li');
+      li.textContent = t;
+      list.appendChild(li);
+    });
+  }
+  document.getElementById('infoPopup').style.display = 'flex'; 
+}
+function closeInfo(){ document.getElementById('infoPopup').style.display = 'none'; }
+
+</script>
+
+</body>
+</html>
